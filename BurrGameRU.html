@@ -3,12 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Burr Game: Shooter V5.1 Beta</title>
+    <title data-translate="title">Burr Game V5.3</title>
     <style>
+        /* --- Base & Body --- */
         body {
             margin: 0;
             padding: 0;
-            background-color: #1a1c1e; /* M3 Dark background */
+            background-color: #1a1c1e; 
             overflow: hidden; 
             font-family: 'monospace', 'Courier New', monospace;
             touch-action: none; 
@@ -21,15 +22,14 @@
             border: 2px solid #000;
         }
 
-        /* --- M3 STYLES --- */
-        /* Общие стили экранов с размытием и скруглением */
+        /* --- M3 STYLES & Menus --- */
         .game-screen {
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background-color: rgba(26, 28, 30, 0.95); /* Почти непрозрачный темный фон */
+            background-color: rgba(26, 28, 30, 0.95);
             display: flex;
             flex-direction: column;
             justify-content: center;
@@ -41,29 +41,29 @@
             text-align: center;
         }
 
-        /* Контейнеры меню M3 */
         .menu-container {
             background-color: #2c2e30;
             padding: 30px;
-            border-radius: 28px; /* M3 Large rounding */
+            border-radius: 28px;
             box-shadow: 0 4px 20px rgba(0,0,0,0.5);
             max-width: 90%;
             width: 400px;
             display: flex;
             flex-direction: column;
             gap: 15px;
+            position: relative; 
         }
 
         h1 { margin: 0; font-size: 32px; color: #ffb74d; }
         h2 { margin: 0; font-size: 24px; color: #e2e2e6; }
         h3 { margin: 10px 0 5px; font-size: 18px; color: #c4c7c5; }
 
-        /* КНОПКИ M3 Expressive (Pills) */
+        /* M3 Buttons */
         .menu-button {
             padding: 15px 24px;
             font-size: 18px;
             border: none;
-            border-radius: 50px; /* Полное скругление (Pill shape) */
+            border-radius: 50px;
             cursor: pointer;
             font-weight: bold;
             transition: transform 0.1s, box-shadow 0.2s, background-color 0.2s;
@@ -73,21 +73,36 @@
             align-items: center;
             justify-content: center;
             gap: 10px;
+            text-transform: uppercase;
         }
 
-        .menu-button:active {
-            transform: scale(0.96);
+        .menu-button:active { transform: scale(0.96); }
+
+        .btn-primary { background-color: #a8c7fa; color: #062e6f; }
+        .btn-secondary { background-color: #d7c0ff; color: #3b0090; }
+        .btn-danger { background-color: #ffb4ab; color: #690005; }
+        .btn-warning { background-color: #ffdcbe; color: #5d4200; }
+        .btn-info { background-color: #4fd8eb; color: #00363d; }
+        
+        /* Language Toggle */
+        #langToggle {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            padding: 8px 12px;
+            font-size: 14px;
+            border-radius: 12px;
+            background-color: #43474e;
+            color: white;
+            cursor: pointer;
+            border: none;
+            transition: background-color 0.2s;
+        }
+        #langToggle:hover {
+            background-color: #5d6166;
         }
 
-        /* Цветовые схемы кнопок M3 */
-        .btn-primary { background-color: #a8c7fa; color: #062e6f; } /* Play Normal */
-        .btn-secondary { background-color: #d7c0ff; color: #3b0090; } /* Wardrobe/Bullets */
-        .btn-danger { background-color: #ffb4ab; color: #690005; } /* Hardcore/Back */
-        .btn-warning { background-color: #ffdcbe; color: #5d4200; } /* Hardened */
-        .btn-info { background-color: #4fd8eb; color: #00363d; } /* Auto */
-        .btn-toggle { position: absolute; top: 20px; right: 20px; width: auto; font-size: 14px; padding: 10px 20px; z-index: 100; }
 
-        /* Сетки для гардероба */
         .grid-container {
             display: flex;
             flex-wrap: wrap;
@@ -96,10 +111,11 @@
             margin-bottom: 20px;
         }
 
+        /* --- V5.2/V5.3: Updated Option Cards --- */
         .option-card {
-            width: 70px;
-            height: 70px;
-            border-radius: 16px; /* M3 Medium rounding */
+            width: 80px; 
+            height: 80px; 
+            border-radius: 20px; 
             background-color: #43474e;
             border: 3px solid transparent;
             cursor: pointer;
@@ -116,10 +132,118 @@
             box-shadow: 0 0 0 4px rgba(168, 199, 250, 0.3);
         }
 
-        .color-preview { width: 40px; height: 40px; border-radius: 12px; }
-        .shape-preview { width: 40px; height: 40px; background-color: #fff; }
+        .color-preview { width: 60px; height: 60px; border-radius: 16px; } 
+        .shape-preview { 
+            width: 60px; 
+            height: 60px; 
+            background-color: #fff; 
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: all 0.2s;
+            color: black;
+            font-size: 30px; 
+            font-weight: 900;
+        }
+        
+        /* V5.3: CSS Shape Styles */
+        .shape-s_rect { border-radius: 10px; }
+        .shape-s_circle { border-radius: 50%; }
+        .shape-s_tri { 
+            background: none !important; 
+            width: 0; height: 0; 
+            border-left: 30px solid transparent;
+            border-right: 30px solid transparent;
+            border-bottom: 52px solid #fff; 
+            margin-top: -10px;
+        }
 
-        /* UI Layer */
+        .shape-s_puffy { 
+            background-color: #fff;
+            border-radius: 30% / 40%; 
+        }
+        
+        .shape-s_diamond {
+            background-color: #fff;
+            clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%); /* Использование clip-path для ромба */
+            transform: none; /* Удаление rotate */
+        }
+
+        .shape-s_sun {
+            background-color: #fff;
+            border-radius: 50%;
+            clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 70% 60%, 80% 95%, 50% 70%, 20% 95%, 30% 60%, 2% 35%, 39% 35%);
+        }
+
+        .shape-s_cookie {
+            background-color: #fff;
+            border-radius: 40% 60% 40% 60% / 60% 40% 60% 40%;
+        }
+
+        /* V5.2: Color Picker Style */
+        #customColorPicker {
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+            border: none;
+            width: 80px;
+            height: 80px;
+            padding: 0;
+            background: none;
+            cursor: pointer;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: inset 0 0 0 4px #2c2e30; 
+        }
+
+        #customColorPicker::-webkit-color-swatch-wrapper { padding: 0; }
+        #customColorPicker::-webkit-color-swatch { border: none; }
+        #customColorPicker::-moz-color-swatch-wrapper { padding: 0; }
+        #customColorPicker::-moz-color-swatch { border: none; }
+
+
+        /* Controls */
+        #controls {
+            position: absolute;
+            bottom: 20px;
+            width: 100%;
+            height: 80px;
+            pointer-events: none; 
+            display: flex;
+            justify-content: space-between;
+            padding: 0 20px;
+            box-sizing: border-box;
+        }
+
+        .control-group {
+            pointer-events: auto;
+            display: flex;
+            gap: 15px;
+            align-items: flex-end;
+        }
+
+        .btn {
+            width: 60px; 
+            height: 60px; 
+            background-color: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(5px);
+            border: 2px solid rgba(255, 255, 255, 0.4);
+            border-radius: 20px; 
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 24px; 
+            user-select: none;
+            cursor: pointer;
+            color: white;
+            font-weight: bold;
+        }
+        
+        .btn:active { background-color: rgba(255, 255, 255, 0.4); transform: scale(0.95); }
+        #btnShoot { background-color: rgba(255, 100, 100, 0.3); }
+        #btnJump { background-color: rgba(255, 255, 100, 0.3); }
+        
+        /* UI */
         #uiLayer {
             position: absolute;
             top: 20px;
@@ -128,64 +252,30 @@
             pointer-events: none;
             text-shadow: 2px 2px 0 #000;
         }
-        
-        /* Чат */
+
+        .heart {
+            font-size: 30px; 
+            margin-right: 5px;
+            color: red; 
+        }
+
+        /* Chat */
         #chatBox {
             position: absolute;
-            top: 80px;
-            left: 50%;
-            transform: translateX(-50%);
-            padding: 12px 24px;
-            background-color: #1a1c1e;
-            border: 1px solid #43474e;
-            color: #e2e2e6;
-            border-radius: 16px;
-            font-size: 16px;
-            z-index: 100;
+            top: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.6);
+            color: white;
+            padding: 10px 15px;
+            border-radius: 10px;
             opacity: 0;
             transition: opacity 0.5s;
+            z-index: 6;
             pointer-events: none;
+            max-width: 300px;
+            text-align: right;
         }
 
-        /* Controls */
-        #controls {
-            position: absolute;
-            bottom: 30px;
-            width: 100%;
-            height: 100px;
-            pointer-events: none; 
-            display: flex;
-            justify-content: space-between;
-            padding: 0 30px;
-            box-sizing: border-box;
-        }
-
-        .control-group {
-            pointer-events: auto;
-            display: flex;
-            gap: 20px;
-            align-items: flex-end;
-        }
-
-        .btn {
-            width: 70px;
-            height: 70px;
-            background-color: rgba(255, 255, 255, 0.2);
-            backdrop-filter: blur(5px);
-            border: 2px solid rgba(255, 255, 255, 0.4);
-            border-radius: 24px; /* Squircle */
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: 28px;
-            user-select: none;
-            cursor: pointer;
-            color: white;
-        }
-        
-        .btn:active { background-color: rgba(255, 255, 255, 0.4); transform: scale(0.95); }
-        #btnShoot { background-color: rgba(255, 100, 100, 0.3); }
-        #btnJump { background-color: rgba(255, 255, 100, 0.3); }
 
         /* Game Over Modal */
         #gameOverModal {
@@ -210,54 +300,59 @@
 
     <div id="menuScreen" class="game-screen">
         <div class="menu-container">
-            <h1>BURR GAME V5.1</h1>
-            <p style="color:#c4c7c5; font-size: 14px;">(Beta: M3 Style + Auto)</p>
+            <button id="langToggle">EN</button> 
+            <h1 data-translate="title">BURR GAME V5.3</h1>
+            <p style="color:#c4c7c5; font-size: 14px;" data-translate="version_note"></p>
 
-            <h3>Режим игры:</h3>
-            <button class="menu-button btn-primary" onclick="startGame('normal')">▶ Обычный (V5.0.2)</button>
-            <button class="menu-button btn-warning" onclick="startGame('hardened')">⚡ Усложнённый (HP x5)</button>
-            <button class="menu-button btn-danger" onclick="startGame('hardcore')">💀 Хардкор (1 HP)</button>
-            <button class="menu-button btn-info" onclick="startGame('auto')">🤖 Автопилот</button>
+            <h3 data-translate="mode_title"></h3>
+            <button class="menu-button btn-primary" onclick="startGame('normal')" data-translate="mode_normal"></button>
+            <button class="menu-button btn-warning" onclick="startGame('hardened')" data-translate="mode_hardened"></button>
+            <button class="menu-button btn-danger" onclick="startGame('hardcore')" data-translate="mode_hardcore"></button>
+            <button class="menu-button btn-info" onclick="startGame('auto')" data-translate="mode_auto"></button>
 
             <div style="display:flex; gap:10px; margin-top:10px;">
-                <button class="menu-button btn-secondary" onclick="openWardrobe()" style="flex:1;">👕 Скины</button>
-                <button class="menu-button btn-secondary" onclick="openBulletSettings()" style="flex:1;">🔫 Пули</button>
+                <button class="menu-button btn-secondary" onclick="openWardrobe()" style="flex:1;" data-translate="skins_btn"></button>
+                <button class="menu-button btn-secondary" onclick="openBulletSettings()" style="flex:1;" data-translate="bullets_btn"></button>
             </div>
             
-            <p style="margin-top:5px; color:#4CAF50;">Рекорд: <span id="highScore">0</span></p>
+            <p style="margin-top:5px; color:#4CAF50;"><span data-translate="record"></span> <span id="highScore">0</span></p>
         </div>
     </div>
 
     <div id="wardrobeScreen" class="game-screen" style="display:none;">
         <div class="menu-container">
-            <h2>ГАРДЕРОБ</h2>
+            <h2 data-translate="skins"></h2>
             <div id="skinContainer" class="grid-container"></div>
-            <button class="menu-button btn-danger" onclick="showMenu()">НАЗАД</button>
+            <button class="menu-button btn-danger" onclick="showMenu()" data-translate="back"></button>
         </div>
     </div>
     
     <div id="bulletSettingsScreen" class="game-screen" style="display:none;">
         <div class="menu-container">
-            <h2>ПУЛИ</h2>
-            <h3>Цвет:</h3>
-            <div id="bulletColorContainer" class="grid-container"></div>
-            <h3>Форма:</h3>
+            <h2 data-translate="bullets"></h2>
+            <h3 data-translate="color_title"></h3>
+            <div id="bulletColorContainer" class="grid-container">
+                <div class="option-card" style="border-radius: 20px;">
+                    <input type="color" id="customColorPicker" value="#FFFF00" onchange="setCustomBulletColor(this.value)">
+                </div>
+            </div>
+            <h3 data-translate="shape_title"></h3>
             <div id="bulletShapeContainer" class="grid-container"></div>
-            <button class="menu-button btn-danger" onclick="showMenu()">НАЗАД</button>
+            <button class="menu-button btn-danger" onclick="showMenu()" data-translate="back"></button>
         </div>
     </div>
 
     <canvas id="gameCanvas"></canvas>
 
-    <button id="autopilotToggle" class="menu-button btn-danger btn-toggle" onclick="disableAutopilotManual()" style="display:none;">СТОП АВТО</button>
+    <button id="autopilotToggle" class="menu-button btn-danger btn-toggle" onclick="disableAutopilotManual()" style="display:none;"></button>
     <div id="uiLayer"></div>
     <div id="chatBox"></div>
     
     <div id="gameOverModal">
         <div class="modal-content">
-            <h2 style="color:#F44336">ИГРА ОКОНЧЕНА!</h2>
-            <p id="gameOverText" style="font-size:20px; margin: 20px 0;">Счет: 0</p>
-            <button class="menu-button btn-primary" onclick="location.reload()">ОК</button>
+            <h2 style="color:#F44336" data-translate="game_over"></h2>
+            <p id="gameOverText" style="font-size:20px; margin: 20px 0;"><span data-translate="score_label"></span> 0</p>
+            <button class="menu-button btn-primary" onclick="location.reload()" data-translate="ok"></button>
         </div>
     </div>
 
@@ -267,55 +362,112 @@
             <div class="btn" id="btnRight">→</div>
         </div>
         <div class="control-group">
-            <div class="btn" id="btnShoot">◉</div>
-            <div class="btn" id="btnJump">▲</div>
+            <div class="btn" id="btnShoot">⦿</div> <div class="btn" id="btnJump">▲</div>
         </div>
     </div>
 
     <script>
-        // --- 1. НАСТРОЙКИ (БАЗА 5.0.2 + НОВОЕ) ---
+        // --- 1. ЛОКАЛИЗАЦИЯ (V5.3 UPDATE) ---
+        const translations = {
+            ru: {
+                title: 'BURR GAME V5.3', version_note: '(M3 Style + Fixed Shapes)', mode_title: 'Режим игры:',
+                mode_normal: 'START Обычный (V5.0.2)', mode_hardened: 'HARDENED Усложнённый (HP x5)',
+                mode_hardcore: 'HARDCORE Хардкор (1 HP)', mode_auto: 'AUTO Автопилот', 
+                skins: 'Скины', skins_btn: 'SKINS Скины',
+                bullets: 'Пули', bullets_btn: 'BULLETS Пули',
+                record: 'Рекорд:', back: 'НАЗАД', color_title: 'Цвет:', shape_title: 'Форма:',
+                stop_auto: 'СТОП АВТО', player_chat_1: 'Игрок: "Даже не вспотел!"', pusheen_chat_1: 'Pusheen: "я вижу тебя. А ты меня?"',
+                pusheen_chat_2: 'Pusheen: "приивееет!!" (мирный)', ai_stop: 'ИИ: Управление передано!',
+                ai_stopping: 'ИИ: Ищу безопасное место...', game_over: 'ИГРА ОКОНЧЕНА!', score_label: 'Счет:', ok: 'ОК',
+                current_score: 'СЧЕТ:', current_high_score: 'РЕКОРД:', current_mode: 'РЕЖИМ:',
+            },
+            en: {
+                title: 'BURR GAME V5.3', version_note: '(M3 Style + Fixed Shapes)', mode_title: 'Game Mode:',
+                mode_normal: 'START Normal (V5.0.2)', mode_hardened: 'HARDENED Hardened (HP x5)',
+                mode_hardcore: 'HARDCORE Hardcore (1 HP)', mode_auto: 'AUTO Autopilot', 
+                skins: 'Skins', skins_btn: 'SKINS Skins',
+                bullets: 'Bullets', bullets_btn: 'BULLETS Bullets',
+                record: 'High Score:', back: 'BACK', color_title: 'Color:', shape_title: 'Shape:',
+                stop_auto: 'STOP AUTO', player_chat_1: 'Player: "Didn\'t even break a sweat!"', pusheen_chat_1: 'Pusheen: "I see you. Do you see me?"',
+                pusheen_chat_2: 'Pusheen: "heeeelllooo!!" (peaceful)', ai_stop: 'AI: Controls handed over!',
+                ai_stopping: 'AI: Looking for a safe spot...', game_over: 'GAME OVER!', score_label: 'Score:', ok: 'OK',
+                current_score: 'SCORE:', current_high_score: 'HIGH SCORE:', current_mode: 'MODE:',
+            }
+        };
+
+        let currentLang = localStorage.getItem('gameLang') || 'ru';
+
+        function setLanguage(lang) {
+            currentLang = lang;
+            localStorage.setItem('gameLang', lang);
+            const t = translations[lang];
+
+            document.querySelectorAll('[data-translate]').forEach(el => {
+                const key = el.getAttribute('data-translate');
+                if (t[key]) {
+                    el.textContent = t[key];
+                }
+            });
+            
+            document.getElementById('highScore').textContent = localStorage.getItem('burr_highScore') || 0;
+            document.getElementById('langToggle').textContent = lang === 'ru' ? 'EN' : 'RU';
+            
+            if (document.getElementById('autopilotToggle') && document.getElementById('autopilotToggle').style.display !== 'none') {
+                document.getElementById('autopilotToggle').textContent = t.stop_auto;
+            }
+
+            updateHUDText();
+        }
+
+        function updateHUDText() {
+             const t = translations[currentLang];
+             if (!document.getElementById('hudScore')) return; 
+             document.getElementById('hudScore').textContent = `${t.current_score} ${score}`;
+             document.getElementById('hudRecord').textContent = `${t.current_high_score} ${highScore}`;
+             document.getElementById('hudMode').textContent = `${t.current_mode} ${gameMode.type.toUpperCase()}`;
+        }
+
+
+        document.getElementById('langToggle').addEventListener('click', () => {
+            const newLang = currentLang === 'ru' ? 'en' : 'ru';
+            setLanguage(newLang);
+        });
+        
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
         
-        // Скины (Добавлены Золотой и Бирюзовый)
+        const uiLayer = document.getElementById('uiLayer');
+        uiLayer.innerHTML = `
+            <div id="hudScore" style="color:#fff; font-size: 20px;"></div>
+            <div id="hudRecord" style="color:#4CAF50; font-size: 20px;"></div>
+            <div id="hudMode" style="color:#4fd8eb; font-size: 20px; margin-bottom: 10px;"></div>
+            <div id="heartContainer"></div>
+        `;
+        const heartContainer = document.getElementById('heartContainer');
+
+
         const availableSkins = [
-            { id: 'cube_red', color: '#FF0000' }, 
-            { id: 'cube_grey', color: '#808080' }, 
-            { id: 'cube_pink', color: '#FFC0CB' },
-            { id: 'cube_beige', color: '#F5F5DC' }, 
-            { id: 'cube_white', color: '#FFFFFF' }, 
-            { id: 'cube_brown', color: '#A52A2A' },
-            { id: 'cube_gold', color: '#FFD700' },       
-            { id: 'cube_purple', color: '#800080' },  
+            { id: 'cube_red', color: '#FF0000' }, { id: 'cube_grey', color: '#808080' }, 
+            { id: 'cube_pink', color: '#FFC0CB' }, { id: 'cube_beige', color: '#F5F5DC' }, 
+            { id: 'cube_white', color: '#FFFFFF' }, { id: 'cube_brown', color: '#A52A2A' },
+            { id: 'cube_gold', color: '#FFD700' }, { id: 'cube_purple', color: '#800080' },  
             { id: 'cube_teal', color: '#008080' }      
         ];
-        
-        // Пули (Цвета)
-        const availableBulletColors = [
-            { id: 'b_yellow', color: '#FFFF00' },
-            { id: 'b_black', color: '#000000' }, 
-            { id: 'b_white', color: '#FFFFFF' },
-            { id: 'b_blue', color: '#0000FF' },
-            { id: 'b_green', color: '#00FF00' },
-            { id: 'b_purple', color: '#800080' }
-        ];
 
-        // Пули (Формы)
+        const defaultBulletColor = '#FFFF00'; 
+
         const availableBulletShapes = [
-            { id: 's_rect', name: '■' },
-            { id: 's_circle', name: '●' },
-            { id: 's_tri', name: '▲' }
+            { id: 's_rect', name: '■' }, { id: 's_circle', name: '●' }, { id: 's_tri', name: '▲' },
+            { id: 's_puffy', name: '' }, { id: 's_diamond', name: '' }, { id: 's_sun', name: '' }, { id: 's_cookie', name: '' }
         ];
 
-        // Сохранение настроек
         let currentSkinId = localStorage.getItem('skinId') || 'cube_red';
         let currentSkinColor = localStorage.getItem('skinColor') || '#FF0000';
-        let currentBulletColor = localStorage.getItem('bulColor') || '#FFFF00';
+        let currentBulletColor = localStorage.getItem('bulColor') || defaultBulletColor;
         let currentBulletShape = localStorage.getItem('bulShape') || 's_rect';
 
-        // Изображения (для совместимости)
         const assets = { ground: new Image(), bullet: new Image(), spike: new Image() };
-        assets.ground.src = '67.png'; assets.bullet.src = '69.png'; assets.spike.src = '65.png';
+        // assets.ground.src = '67.png'; assets.bullet.src = '69.png'; assets.spike.src = '65.png'; 
 
         function resize() {
             canvas.width = window.innerWidth;
@@ -324,21 +476,13 @@
         window.addEventListener('resize', resize);
         resize();
 
-        // --- 2. ГЕЙМПЛЕЙ (ФИЗИКА 5.0.2 - НЕ ТРОГАЕМ!) ---
-        
-        // Настройки режима V5.1
         let gameMode = {
-            type: 'normal', // normal, hardened, hardcore, auto
-            enemyHP: 1,
-            speedMult: 1,
-            isAuto: false,
-            autoState: 'off' // off, active, stopping
+            type: 'normal',
+            enemyHP: 1, speedMult: 1, isAuto: false, autoState: 'off'
         };
 
         let gameState = 'MENU';
-        const GRAVITY = 0.8; 
-        const TERMINAL_VELOCITY = 15;
-        const TILE_SIZE = 50; 
+        const GRAVITY = 0.8; const TERMINAL_VELOCITY = 15; const TILE_SIZE = 50; 
         
         const player = {
             x: 100, y: 100, width: TILE_SIZE, height: TILE_SIZE,
@@ -361,9 +505,7 @@
 
         // --- УПРАВЛЕНИЕ ---
         window.addEventListener('keydown', (e) => {
-            // Если автопилот активен, любое нажатие выключает его
             if (gameMode.isAuto && gameMode.autoState === 'active') disableAutopilotManual();
-
             if (e.code === 'ArrowLeft' || e.code === 'KeyA') keys.left = true;
             if (e.code === 'ArrowRight' || e.code === 'KeyD') keys.right = true;
             if (e.code === 'ArrowUp' || e.code === 'Space' || e.code === 'KeyW') {
@@ -398,6 +540,7 @@
             document.getElementById(id).style.display = 'flex';
             document.getElementById('controls').style.display = 'none';
             document.getElementById('autopilotToggle').style.display = 'none';
+            setLanguage(currentLang);
         }
 
         function showMenu() {
@@ -407,7 +550,11 @@
         }
 
         function openWardrobe() { showScreen('wardrobeScreen'); renderSkins(); }
-        function openBulletSettings() { showScreen('bulletSettingsScreen'); renderBulletSettings(); }
+        function openBulletSettings() { 
+            showScreen('bulletSettingsScreen'); 
+            document.getElementById('customColorPicker').value = currentBulletColor;
+            renderBulletSettings(); 
+        }
 
         function renderSkins() {
             const c = document.getElementById('skinContainer'); c.innerHTML = '';
@@ -423,38 +570,52 @@
                 c.appendChild(d);
             });
         }
+        
+        function setCustomBulletColor(color) {
+            currentBulletColor = color; 
+            localStorage.setItem('bulColor', color);
+            // Если выбран новый цвет, нужно убедиться, что пикер выглядит выбранным
+            document.getElementById('bulletColorContainer').querySelector('.option-card').classList.add('selected');
+            renderBulletSettings(); 
+        }
 
         function renderBulletSettings() {
-            const cColor = document.getElementById('bulletColorContainer'); cColor.innerHTML = '';
-            availableBulletColors.forEach(b => {
-                const d = document.createElement('div'); d.className = 'option-card';
-                if(currentBulletColor === b.color) d.classList.add('selected');
-                d.innerHTML = `<div class="color-preview" style="background:${b.color}"></div>`;
-                d.onclick = () => { 
-                    currentBulletColor = b.color; localStorage.setItem('bulColor', b.color); renderBulletSettings(); 
-                };
-                cColor.appendChild(d);
-            });
+            const cColor = document.getElementById('bulletColorContainer'); 
+            const pickerCard = cColor.querySelector('.option-card');
+            pickerCard.classList.add('selected'); // Пикер всегда выбран, так как это основной способ выбора
+            
+            const picker = document.getElementById('customColorPicker');
+            picker.value = currentBulletColor; 
 
             const cShape = document.getElementById('bulletShapeContainer'); cShape.innerHTML = '';
             availableBulletShapes.forEach(s => {
                 const d = document.createElement('div'); d.className = 'option-card';
                 if(currentBulletShape === s.id) d.classList.add('selected');
-                d.innerHTML = `<div class="shape-preview" style="display:flex;justify-content:center;align-items:center;border-radius:50%;color:black;font-size:20px;">${s.name}</div>`;
+                
+                const preview = document.createElement('div');
+                preview.className = `shape-preview shape-${s.id}`;
+                preview.textContent = s.name;
+                
+                if (s.id !== 's_tri') { // Для треугольника используется бордер
+                    preview.style.backgroundColor = '#fff'; 
+                }
+
+                d.appendChild(preview);
+                
                 d.onclick = () => { 
-                    currentBulletShape = s.id; localStorage.setItem('bulShape', s.id); renderBulletSettings(); 
+                    currentBulletShape = s.id; 
+                    localStorage.setItem('bulShape', s.id); 
+                    renderBulletSettings(); 
                 };
                 cShape.appendChild(d);
             });
         }
 
         function startGame(mode) {
-            // Настройка режима
             gameMode.type = mode;
             gameMode.isAuto = (mode === 'auto');
             gameMode.autoState = (mode === 'auto') ? 'active' : 'off';
             
-            // Параметры сложности
             if (mode === 'normal' || mode === 'auto') {
                 gameMode.enemyHP = 1; gameMode.speedMult = 1; player.maxHp = 3;
             } else if (mode === 'hardened') {
@@ -463,12 +624,12 @@
                 gameMode.enemyHP = 5; gameMode.speedMult = 2.0; player.maxHp = 1;
             }
 
-            // Старт
             document.querySelectorAll('.game-screen').forEach(s => s.style.display = 'none');
             document.getElementById('gameCanvas').style.display = 'block';
             
             if (gameMode.isAuto) {
                 document.getElementById('autopilotToggle').style.display = 'block';
+                document.getElementById('autopilotToggle').textContent = translations[currentLang].stop_auto;
                 document.getElementById('controls').style.display = 'none';
             } else {
                 document.getElementById('controls').style.display = 'flex';
@@ -479,58 +640,50 @@
             loop();
         }
 
-        // --- ИГРОВАЯ ЛОГИКА (V5.1 Update) ---
+        // --- ИГРОВАЯ ЛОГИКА ---
 
         function disableAutopilotManual() {
             if(gameMode.autoState === 'active') {
                 gameMode.autoState = 'stopping';
-                document.getElementById('autopilotToggle').textContent = 'ОСТАНОВКА...';
-                showChat("ИИ: Ищу безопасное место...");
+                document.getElementById('autopilotToggle').textContent = translations[currentLang].ai_stopping;
+                showChat(translations[currentLang].ai_stopping);
             }
         }
 
-        // Умный ИИ
         function runAutopilot() {
             if (gameMode.autoState === 'off') return;
             
-            // Если режим "остановка" и мы на земле - стоп
             if (gameMode.autoState === 'stopping' && player.grounded) {
                 gameMode.isAuto = false;
                 gameMode.autoState = 'off';
                 document.getElementById('autopilotToggle').style.display = 'none';
                 document.getElementById('controls').style.display = 'flex';
                 keys.right = false; keys.up = false; keys.shoot = false;
-                showChat("ИИ: Управление передано!");
+                showChat(translations[currentLang].ai_stop);
                 return;
             }
 
-            // Сканирование вперед
             const lookAhead = 150;
             let dangerSpike = false;
             let groundAhead = false;
             let targetAhead = false;
 
-            // Проверка шипов
             for (let e of enemies) {
                 if (e.x > player.x && e.x < player.x + lookAhead) dangerSpike = true;
             }
-            // Проверка земли (чтобы не упасть)
             for (let p of platforms) {
-                if (p.x < player.x + lookAhead + 50 && p.x + p.width > player.x + lookAhead) groundAhead = true;
+                if (p.x < player.x + lookAhead + 50 && p.x + p.width > player.x + lookAhead && Math.abs(p.y - player.y) < TILE_SIZE*2) groundAhead = true;
             }
-            // Проверка врагов для стрельбы
             for (let t of targets) {
                 if (t.x > player.x && t.x < player.x + 400 && Math.abs(t.y - player.y) < 50) targetAhead = true;
             }
 
-            // Действия
             keys.right = true;
             keys.shoot = targetAhead;
 
-            // Прыжок: если шип или если впереди нет земли
             if (dangerSpike || !groundAhead) {
                 if (player.grounded) keys.up = true;
-                else if (player.jumpsLeft > 0 && player.vy > 0) keys.up = true; // Двойной прыжок если падаем
+                else if (player.jumpsLeft > 0 && player.vy > 0) keys.up = true;
             } else {
                 keys.up = false;
             }
@@ -545,10 +698,10 @@
             pusheenSpawned = false; pusheenDefeated = false;
             
             updateHearts();
+            updateHUDText(); 
 
-            // Генерация (код 5.0.2 сохранен)
             for(let i=0; i<5; i++) platforms.push({ x: i * TILE_SIZE, y: canvas.height - TILE_SIZE, width: TILE_SIZE, height: TILE_SIZE });
-            platforms.push({ x: -TILE_SIZE, y: canvas.height - TILE_SIZE, width: TILE_SIZE, height: TILE_SIZE }); // Backwards
+            platforms.push({ x: -TILE_SIZE, y: canvas.height - TILE_SIZE, width: TILE_SIZE, height: TILE_SIZE }); 
 
             let currentX = 5 * TILE_SIZE;
             for(let i=0; i<80; i++) {
@@ -581,7 +734,6 @@
             }
         }
 
-        // ФИЗИКА (5.0.2)
         function checkCollision(r1, r2) {
             return (r1.x < r2.x + r2.width && r1.x + r1.width > r2.x && r1.y < r2.y + r2.height && r1.y + r1.height > r2.y);
         }
@@ -606,9 +758,17 @@
         function shoot() {
             if (gameState !== 'PLAYING' || !canShoot) return;
             const bSpeed = player.facingRight ? 15 : -15; 
+            
+            let bulletWidth = 20, bulletHeight = 10;
+            // V5.3: Установка размеров пули
+            if (currentBulletShape === 's_circle' || currentBulletShape === 's_puffy' || currentBulletShape === 's_diamond' || currentBulletShape === 's_sun' || currentBulletShape === 's_cookie') {
+                 bulletWidth = bulletHeight = 20;
+            }
+
+
             bullets.push({ 
                 x: player.x + player.width / 2, y: player.y + player.height / 2 - 5, 
-                vx: bSpeed, width: 20, height: 10, life: 60, 
+                vx: bSpeed, width: bulletWidth, height: bulletHeight, life: 60, 
                 color: currentBulletColor, shape: currentBulletShape 
             });
             canShoot = false;
@@ -622,7 +782,6 @@
             if (keys.shoot) shoot();
             if (player.cooldownTimer > 0) player.cooldownTimer--; else if (player.cooldownTimer === 0) canShoot = true;
 
-            // Скорость зависит от режима
             let moveSpeed = player.speed * gameMode.speedMult;
 
             if (keys.left && !gameMode.isAuto) { player.vx = -moveSpeed; player.facingRight = false; } 
@@ -631,18 +790,17 @@
 
             if (keys.up) {
                 if (player.grounded) { player.vy = player.jumpPower; player.grounded = false; player.jumpsLeft--; } 
-                else if (player.jumpsLeft > 0 && !gameMode.isAuto) { player.vy = player.jumpPower; player.jumpsLeft--; keys.up = false; } // Фикс для ручного двойного
-                else if (gameMode.isAuto && player.jumpsLeft > 0 && player.vy > 0) { player.vy = player.jumpPower; player.jumpsLeft--; } // ИИ двойной
+                else if (player.jumpsLeft > 0 && !gameMode.isAuto) { player.vy = player.jumpPower; player.jumpsLeft--; keys.up = false; }
+                else if (gameMode.isAuto && player.jumpsLeft > 0 && player.vy > 0) { player.vy = player.jumpPower; player.jumpsLeft--; }
             }
 
             player.vy += GRAVITY;
             if(player.vy > TERMINAL_VELOCITY) player.vy = TERMINAL_VELOCITY;
             player.x += player.vx; player.y += player.vy;
 
-            // Пасхалка
-            if (!pusheenSpawned && player.x < 50) { pusheenSpawned = true; enemies.push(pusheenEnemy); showChat('Pusheen: "я вижу тебя. А ты меня?"'); }
+            if (!pusheenSpawned && player.x > 500) { pusheenSpawned = true; enemies.push(pusheenEnemy); showChat(translations[currentLang].pusheen_chat_1); }
             if (pusheenSpawned && !pusheenDefeated && pusheenEnemy.hp <= 0) {
-                 pusheenDefeated = true; showChat('Игрок: "Даже не вспотел!"', 2500); setTimeout(() => showChat('Pusheen: "приивееет!!"'), 3000);
+                 pusheenDefeated = true; showChat(translations[currentLang].player_chat_1, 2500); setTimeout(() => showChat(translations[currentLang].pusheen_chat_2), 3000);
             }
 
             player.grounded = false;
@@ -651,7 +809,7 @@
 
             if (player.y > canvas.height + 100) takeDamage(3);
             const currentBlock = Math.floor(player.x / TILE_SIZE);
-            if (currentBlock > lastScoredBlock + 3) { score += 10; lastScoredBlock = currentBlock; }
+            if (currentBlock > lastScoredBlock + 3) { score += 10; lastScoredBlock = currentBlock; updateHUDText(); }
 
             for (let i = bullets.length - 1; i >= 0; i--) {
                 let b = bullets[i]; b.x += b.vx; b.life--;
@@ -663,6 +821,7 @@
                 if (pusheenSpawned && !pusheenDefeated && checkCollision(b, pusheenEnemy)) { pusheenEnemy.hp--; score += 1; hit = true; }
                 if (b.life <= 0 || hit) bullets.splice(i, 1);
             }
+            updateHUDText();
 
             if (player.invulnerable > 0) player.invulnerable--;
             for (let i = enemies.length - 1; i >= 0; i--) {
@@ -685,69 +844,146 @@
             if (player.hp <= 0) {
                 gameState = 'GAMEOVER';
                 if (score > highScore) { highScore = score; localStorage.setItem('burr_highScore', highScore); }
-                document.getElementById('gameOverText').textContent = `Счет: ${score} | Рекорд: ${highScore}`;
+                
+                const t = translations[currentLang];
+                document.getElementById('gameOverText').innerHTML = `${t.score_label} ${score} | ${t.record}: ${highScore}`;
                 document.getElementById('gameOverModal').style.display = 'flex';
                 document.getElementById('controls').style.display = 'none';
                 document.getElementById('autopilotToggle').style.display = 'none';
             }
         }
 
+        const chatBox = document.getElementById('chatBox');
         function showChat(message, duration = 2000) {
             chatBox.textContent = message; chatBox.style.opacity = '1';
             setTimeout(() => { chatBox.style.opacity = '0'; }, duration);
         }
 
         function updateHearts() {
-            const ui = document.getElementById('uiLayer'); ui.innerHTML = '';
+            heartContainer.innerHTML = '';
             for(let i=0; i<player.hp; i++) {
-                const h = document.createElement('span'); h.className = 'heart'; h.innerHTML = '♥️'; ui.appendChild(h);
+                const h = document.createElement('span'); h.className = 'heart'; h.innerHTML = '♥️'; heartContainer.appendChild(h);
             }
         }
 
-        // --- ОТРИСОВКА ---
+        // --- ОТРИСОВКА (V5.3 FIX) ---
+        
+        // Вспомогательная функция для отрисовки звезд/лучей
+        function drawStar(ctx, cx, cy, spikes, outerRadius, innerRadius) {
+            let rot = Math.PI / 2 * 3;
+            let x = cx;
+            let y = cy;
+            let step = Math.PI / spikes;
+
+            ctx.beginPath();
+            ctx.moveTo(cx, cy - outerRadius);
+            for (let i = 0; i < spikes; i++) {
+                x = cx + Math.cos(rot) * outerRadius;
+                y = cy + Math.sin(rot) * outerRadius;
+                ctx.lineTo(x, y);
+                rot += step;
+
+                x = cx + Math.cos(rot) * innerRadius;
+                y = cy + Math.sin(rot) * innerRadius;
+                ctx.lineTo(x, y);
+                rot += step;
+            }
+            ctx.closePath();
+            ctx.fill();
+        }
+
+        // Вспомогательная функция для отрисовки "мягкого" прямоугольника (Squircle/Cookie)
+        function drawRoundedRect(ctx, x, y, w, h, radius) {
+            let r = radius; // Общий радиус
+            // Для "печенья" и сквиркла нужно скругление, но без использования стандартного arc
+            // Здесь мы используем простую версию с малым радиусом, чтобы имитировать "мягкость"
+            if (r > w / 2) r = w / 2;
+            if (r > h / 2) r = h / 2;
+
+            ctx.beginPath();
+            ctx.moveTo(x + r, y);
+            ctx.lineTo(x + w - r, y);
+            ctx.quadraticCurveTo(x + w, y, x + w, y + r); // Top right
+            ctx.lineTo(x + w, y + h - r);
+            ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h); // Bottom right
+            ctx.lineTo(x + r, y + h);
+            ctx.quadraticCurveTo(x, y + h, x, y + h - r); // Bottom left
+            ctx.lineTo(x, y + r);
+            ctx.quadraticCurveTo(x, y, x + r, y); // Top left
+            ctx.closePath();
+            ctx.fill();
+        }
+
+
         function draw() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             ctx.save(); ctx.translate(-cameraX, 0);
 
-            // Земля
+            // ... (Отрисовка платформ, таргетов, врагов - без изменений)
             for (let p of platforms) {
                 if (assets.ground.complete && assets.ground.naturalHeight !== 0) ctx.drawImage(assets.ground, p.x, p.y, p.width, p.height);
                 else { ctx.fillStyle = '#654321'; ctx.fillRect(p.x, p.y, p.width, p.height); ctx.fillStyle = '#00FF00'; ctx.fillRect(p.x, p.y, p.width, 10); }
             }
-            // Цели
+
             for (let t of targets) {
                 ctx.fillStyle = `rgba(0, 0, 255, ${t.hp / gameMode.enemyHP})`; 
                 ctx.fillRect(t.x, t.y, t.width, t.height);
                 if (assets.ground.complete && assets.ground.naturalHeight !== 0) { ctx.globalAlpha = 0.2; ctx.drawImage(assets.ground, t.x, t.y, t.width, t.height); ctx.globalAlpha = 1.0; }
                 ctx.fillStyle = 'white'; ctx.font = 'bold 20px monospace'; ctx.fillText(t.hp, t.x + t.width/2 - 5, t.y + t.height/2 + 5);
             }
-            // Шипы
+
             for (let e of enemies) {
                 if(e.type === 'spike') {
                     if (assets.spike.complete && assets.spike.naturalHeight !== 0) ctx.drawImage(assets.spike, e.x, e.y, e.width, e.height);
                     else { ctx.fillStyle = 'purple'; ctx.beginPath(); ctx.moveTo(e.x, e.y+e.height); ctx.lineTo(e.x+e.width/2, e.y); ctx.lineTo(e.x+e.width, e.y+e.height); ctx.fill(); }
-                } else if (e.type === 'pusheen' && !pusheenDefeated) {
-                    ctx.fillStyle = 'darkred'; ctx.fillRect(e.x, e.y, e.width, e.height);
-                    ctx.fillStyle = 'white'; ctx.font = '16px monospace'; ctx.fillText(`BOSS`, e.x, e.y-5);
+                } else if (e.type === 'pusheen') {
+                    if (!pusheenDefeated) {
+                        ctx.fillStyle = 'darkred'; ctx.fillRect(e.x, e.y, e.width, e.height);
+                        ctx.fillStyle = 'white'; ctx.font = '16px monospace'; ctx.fillText(`BOSS`, e.x, e.y-5);
+                    } else {
+                        ctx.fillStyle = 'pink'; ctx.fillRect(e.x, e.y, e.width, e.height);
+                        ctx.fillStyle = 'black'; ctx.font = '16px monospace'; ctx.fillText(`PUSHEEN`, e.x, e.y-5);
+                    }
                 }
             }
 
-            // Пули (Кастомные)
             for (let b of bullets) {
                 ctx.fillStyle = b.color;
-                if(b.shape === 's_circle') { ctx.beginPath(); ctx.arc(b.x, b.y+b.height/2, b.height/2, 0, Math.PI*2); ctx.fill(); }
-                else if (b.shape === 's_tri') {
+                
+                // V5.3: Исправленная отрисовка фигур
+                if (b.shape === 's_circle') { 
+                    ctx.beginPath(); 
+                    ctx.arc(b.x + b.width/2, b.y + b.height/2, b.width/2, 0, Math.PI * 2); 
+                    ctx.fill(); 
+                } else if (b.shape === 's_tri') {
                     ctx.beginPath();
-                    if(b.vx > 0) { ctx.moveTo(b.x, b.y); ctx.lineTo(b.x+b.width, b.y+b.height/2); ctx.lineTo(b.x, b.y+b.height); }
-                    else { ctx.moveTo(b.x+b.width, b.y); ctx.lineTo(b.x, b.y+b.height/2); ctx.lineTo(b.x+b.width, b.y+b.height); }
+                    if(b.vx > 0) { ctx.moveTo(b.x, b.y); ctx.lineTo(b.x + b.width, b.y + b.height / 2); ctx.lineTo(b.x, b.y + b.height); }
+                    else { ctx.moveTo(b.x + b.width, b.y); ctx.lineTo(b.x, b.y + b.height / 2); ctx.lineTo(b.x + b.width, b.y + b.height); }
                     ctx.fill();
-                } else { ctx.fillRect(b.x, b.y, b.width, b.height); }
+                } else if (b.shape === 's_diamond') {
+                    // Точная отрисовка ромба
+                    let cx = b.x + b.width / 2;
+                    let cy = b.y + b.height / 2;
+                    ctx.beginPath();
+                    ctx.moveTo(cx, b.y); // Top
+                    ctx.lineTo(b.x + b.width, cy); // Right
+                    ctx.lineTo(cx, b.y + b.height); // Bottom
+                    ctx.lineTo(b.x, cy); // Left
+                    ctx.closePath();
+                    ctx.fill();
+                } else if (b.shape === 's_sun') {
+                    // Отрисовка звезды
+                    drawStar(ctx, b.x + b.width/2, b.y + b.height/2, 5, b.width/2, b.width/4);
+                } else if (b.shape === 's_cookie' || b.shape === 's_puffy') {
+                    // Отрисовка сквиркла/печенья
+                    drawRoundedRect(ctx, b.x, b.y, b.width, b.height, b.width * 0.4); 
+                } else { 
+                    ctx.fillRect(b.x, b.y, b.width, b.height); 
+                }
             }
 
-            // Игрок
             if (player.invulnerable % 10 < 5) { ctx.fillStyle = currentSkinColor; ctx.fillRect(player.x, player.y, player.width, player.height); }
 
-            // Индикатор прыжка
             if (!player.grounded && player.jumpsLeft > 0) {
                 const bx = player.x + 10; const by = player.y - 15;
                 ctx.fillStyle = 'rgba(255,0,0,0.5)'; ctx.fillRect(bx, by, 30, 5);
@@ -755,12 +991,8 @@
             }
 
             ctx.restore();
-            // HUD
             ctx.fillStyle = 'rgba(255,255,255,0.7)'; ctx.font = 'bold 16px monospace';
-            ctx.fillText('V5.1 Beta', canvas.width - 100, 20);
-            ctx.fillStyle = '#fff';
-            ctx.fillText(`СЧЕТ: ${score}`, 10, 50);
-            ctx.fillText(`РЕЖИМ: ${gameMode.type.toUpperCase()}`, 10, 70);
+            ctx.fillText('V5.3', canvas.width - 60, 20);
         }
 
         function loop() {
@@ -768,7 +1000,10 @@
             if (gameState === 'PLAYING') requestAnimationFrame(loop);
         }
         
-        window.onload = function() { showMenu(); };
+        window.onload = function() { 
+            setLanguage(currentLang);
+            showMenu(); 
+        };
     </script>
 </body>
 </html>
