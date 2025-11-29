@@ -1,0 +1,1075 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Burr Game: Shooter V5.0.2 (Pixel)</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #333;
+            overflow: hidden; 
+            font-family: 'monospace', 'Courier New', monospace; /* ПИКСЕЛЬНЫЙ ШРИФТ */
+            touch-action: none; 
+        }
+
+        #gameCanvas {
+            display: block;
+            margin: 0 auto;
+            background-color: #87CEEB; 
+            border: 2px solid #000;
+        }
+
+        /* Общие стили для экранов */
+        .game-screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.85);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 10;
+            color: white;
+            padding: 20px;
+            box-sizing: border-box;
+            text-align: center;
+        }
+
+        /* --- Меню --- */
+        #menuScreen {
+            background-color: white; 
+        }
+
+        #menuImage {
+            max-width: 80%;
+            max-height: 50vh; 
+            margin-bottom: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            border-radius: 10px;
+        }
+
+        .menu-button {
+            padding: 15px 40px;
+            font-size: 24px;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: bold;
+            margin-top: 10px;
+            transition: all 0.1s;
+            width: 300px;
+            max-width: 80%;
+        }
+
+        #startButton {
+            background-color: #4CAF50;
+            box-shadow: 0 4px #2E7D32;
+        }
+        #startButton:active {
+            box-shadow: 0 2px #2E7D32;
+            transform: translateY(2px);
+        }
+
+        #wardrobeButton {
+            background-color: #FF9800;
+            box-shadow: 0 4px #E65100;
+        }
+        #wardrobeButton:active {
+            box-shadow: 0 2px #E65100;
+            transform: translateY(2px);
+        }
+        
+        #autoModeButton {
+            background-color: #00BCD4;
+            box-shadow: 0 4px #0097A7;
+            cursor: default; 
+            opacity: 0.6;
+        }
+
+        /* --- Гардероб --- */
+        #wardrobeScreen h2 {
+            margin-bottom: 20px;
+            font-size: 36px;
+        }
+        
+        #wardrobeTabs {
+            display: flex;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #555;
+        }
+        .tab-button {
+            padding: 10px 20px;
+            cursor: pointer;
+            border: none;
+            background: none;
+            color: #ccc;
+            font-size: 18px;
+            transition: color 0.2s, background 0.2s;
+        }
+        .tab-button.active {
+            color: white;
+            background-color: #555;
+            border-top-left-radius: 5px;
+            border-top-right-radius: 5px;
+        }
+
+        #skinContainer, #bulletContainer {
+            display: none; 
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 20px;
+            margin-bottom: 30px;
+            padding: 10px;
+        }
+        #skinContainer.active, #bulletContainer.active {
+            display: flex;
+        }
+
+        .skin-option {
+            width: 100px;
+            height: 100px;
+            border: 5px solid transparent;
+            border-radius: 15px;
+            overflow: hidden;
+            cursor: pointer;
+            transition: all 0.2s;
+            background-color: #222;
+            padding: 5px;
+            display: flex; 
+            justify-content: center;
+            align-items: center;
+            box-sizing: content-box;
+        }
+        
+        .skin-color {
+            width: 100%;
+            height: 100%;
+            border-radius: 10px;
+        }
+        
+        .bullet-preview {
+            width: 80%;
+            height: 30%;
+            border-radius: 5px;
+        }
+
+        .skin-option.selected {
+            border-color: #4CAF50;
+            box-shadow: 0 0 15px #4CAF50;
+        }
+
+        #backToMenuButton {
+             background-color: #F44336;
+             box-shadow: 0 4px #D32F2F;
+        }
+        #backToMenuButton:active {
+             box-shadow: 0 2px #D32F2F;
+             transform: translateY(2px);
+        }
+
+        /* --- Интерфейс и Управление --- */
+        #uiLayer {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            z-index: 5;
+            pointer-events: none;
+        }
+        
+        .heart {
+            display: inline-block;
+            width: 30px;
+            height: 30px;
+            margin-right: 5px;
+            image-rendering: pixelated; 
+        }
+        
+        /* Чат для пасхалки */
+        #chatBox {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 10px 20px;
+            background-color: rgba(0, 0, 0, 0.7);
+            color: white;
+            border-radius: 8px;
+            font-size: 20px;
+            z-index: 100;
+            opacity: 0;
+            transition: opacity 0.5s;
+            pointer-events: none;
+            white-space: nowrap;
+        }
+
+        /* --- Контролы (без изменений) --- */
+        #controls {
+            position: absolute;
+            bottom: 20px;
+            width: 100%;
+            height: 120px;
+            pointer-events: none; 
+            display: flex;
+            justify-content: space-between;
+            padding: 0 20px;
+            box-sizing: border-box;
+        }
+
+        .control-group {
+            pointer-events: auto;
+            display: flex;
+            gap: 10px;
+            align-items: flex-end;
+        }
+
+        .btn {
+            width: 60px;
+            height: 60px;
+            background-color: rgba(255, 255, 255, 0.5);
+            border: 2px solid rgba(0, 0, 0, 0.5);
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 24px;
+            user-select: none;
+            cursor: pointer;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .btn:active {
+            background-color: rgba(255, 255, 255, 0.8);
+            transform: scale(0.95);
+        }
+
+        #btnJump { background-color: rgba(255, 255, 0, 0.4); }
+        #btnShoot { background-color: rgba(255, 0, 0, 0.4); }
+    </style>
+</head>
+<body>
+
+    <div id="menuScreen" class="game-screen">
+        <h1 style="color:#FF9800;">BURR GAME V5.0.2</h1>
+        <p style="color:black;">(Pixel Edition)</p>
+        <button id="startButton" class="menu-button">ИГРАТЬ</button>
+        <button id="wardrobeButton" class="menu-button">ГАРДЕРОБ</button>
+        <button id="autoModeButton" class="menu-button">АВТО (В РАЗРАБОТКЕ)</button>
+        <p style="margin-top:10px; color:#666;">(Нажми кнопку или пробел)</p>
+        <p style="margin-top:10px; color:#4CAF50;">Рекорд: <span id="highScore">0</span></p>
+    </div>
+
+    <div id="wardrobeScreen" class="game-screen" style="display:none;">
+        <h2>ГАРДЕРОБ</h2>
+        
+        <div id="wardrobeTabs">
+            <button id="tabColors" class="tab-button active">ЦВЕТА</button>
+            <button id="tabBullets" class="tab-button">ПУЛИ</button>
+        </div>
+
+        <div id="skinContainer" class="active"></div>
+        <div id="bulletContainer"></div>
+
+        <button id="backToMenuButton" class="menu-button">НАЗАД В МЕНЮ</button>
+    </div>
+
+
+    <canvas id="gameCanvas"></canvas>
+
+    <div id="infoIcon">i</div>
+    <div id="infoText">Гарри Поттер & Gemini 3 Pro (V5.0.2)</div>
+    <div id="chatBox"></div>
+
+    <div id="uiLayer"></div>
+
+    <div id="controls" style="display:none;">
+        <div class="control-group">
+            <div class="btn" id="btnLeft">⬅️</div>
+            <div class="btn" id="btnRight">➡️</div>
+        </div>
+        <div class="control-group">
+            <div class="btn" id="btnShoot">🔫</div>
+            <div class="btn" id="btnJump">⬆️</div>
+        </div>
+    </div>
+
+    <script>
+        // --- 1. НАСТРОЙКА И ЗАГРУЗКА РЕСУРСОВ ---
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        
+        // V5.1: Обновленные цвета скинов
+        const availableSkins = [
+            { id: 'cube_red', name: 'Красный', color: '#FF0000' }, 
+            { id: 'cube_grey', name: 'Серый', color: '#808080' }, 
+            { id: 'cube_pink', name: 'Розовый', color: '#FFC0CB' },
+            { id: 'cube_beige', name: 'Бежевый', color: '#F5F5DC' }, 
+            { id: 'cube_white', name: 'Белый', color: '#FFFFFF' }, 
+            { id: 'cube_brown', name: 'Коричневый', color: '#A52A2A' },
+            { id: 'cube_gold', name: 'Золотой', color: '#FFD700' },       
+            { id: 'cube_purple', name: 'Пурпурный', color: '#800080' },  
+            { id: 'cube_teal', name: 'Бирюзовый', color: '#008080' }      
+        ];
+        
+        // V5.1: Цвета пуль
+        const availableBulletColors = [
+            { id: 'bullet_yellow', name: 'Желтый', color: '#FFFF00' },
+            { id: 'bullet_black', name: 'Черный', color: '#000000' }, 
+            { id: 'bullet_white', name: 'Белый', color: '#FFFFFF' }   
+        ];
+
+        let currentSkinId = 'cube_red'; 
+        let currentSkinColor = '#FF0000'; 
+        let currentBulletId = 'bullet_yellow';
+        let currentBulletColor = '#FFFF00'; 
+
+        // Загрузка изображений (если они есть)
+        const assets = {
+            ground: new Image(),
+            bullet: new Image(),
+            spike: new Image(),
+        };
+
+        assets.ground.src = '67.png';
+        assets.bullet.src = '69.png';
+        assets.spike.src = '65.png';
+
+        function resize() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resize);
+        resize();
+
+        // --- 2. ПЕРЕМЕННЫЕ ИГРЫ И УПРАВЛЕНИЕ ---
+
+        let gameState = 'MENU';
+        const GRAVITY = 0.8; 
+        const TERMINAL_VELOCITY = 15;
+        const TILE_SIZE = 50; 
+        
+        const player = {
+            x: 100,
+            y: 100,
+            width: TILE_SIZE,
+            height: TILE_SIZE,
+            vx: 0,
+            vy: 0,
+            speed: 7, 
+            jumpPower: -16, 
+            grounded: false,
+            hp: 3,
+            maxHp: 3,
+            facingRight: true,
+            invulnerable: 0,
+            cooldownTimer: 0,
+            jumpsLeft: 1, 
+            maxJumps: 2
+        };
+
+        let bullets = [];
+        let enemies = []; 
+        let targets = []; 
+        let platforms = []; 
+        let cameraX = 0;
+        let score = 0;
+        let highScore = localStorage.getItem('burr_highScore') || 0;
+        let lastScoredBlock = 0; 
+
+        // V5.1: Переменные для Пасхалки
+        let pusheenSpawned = false;
+        let pusheenDefeated = false;
+        const pusheenEnemy = { x: -300, y: canvas.height - TILE_SIZE - 50, width: 50, height: 50, hp: 50, type: 'pusheen' };
+
+        const keys = { left: false, right: false, up: false, shoot: false };
+        let canShoot = true; 
+        const shootCooldown = 15; 
+
+        // V5.1: Добавление двойного прыжка
+        window.addEventListener('keydown', (e) => {
+            if (e.code === 'ArrowLeft' || e.code === 'KeyA') keys.left = true;
+            if (e.code === 'ArrowRight' || e.code === 'KeyD') keys.right = true;
+            if (e.code === 'ArrowUp' || e.code === 'Space' || e.code === 'KeyW') {
+                if(gameState === 'MENU' && e.code === 'Space') startGame();
+                else keys.up = true;
+            }
+            if (e.code === 'KeyZ' || e.code === 'KeyE') keys.shoot = true;
+        });
+
+        window.addEventListener('keyup', (e) => {
+            if (e.code === 'ArrowLeft' || e.code === 'KeyA') keys.left = false;
+            if (e.code === 'ArrowRight' || e.code === 'KeyD') keys.right = false;
+            if (e.code === 'ArrowUp' || e.code === 'Space' || e.code === 'KeyW') keys.up = false;
+            if (e.code === 'KeyZ' || e.code === 'KeyE') keys.shoot = false;
+        });
+
+        // Тач кнопки (без изменений)
+        const addTouch = (id, keyName, isTap = false) => {
+            const el = document.getElementById(id);
+            if (!el) return;
+            el.addEventListener('touchstart', (e) => { 
+                e.preventDefault(); 
+                keys[keyName] = true; 
+            });
+            el.addEventListener('touchend', (e) => { 
+                e.preventDefault(); 
+                keys[keyName] = false; 
+            });
+            el.addEventListener('mousedown', (e) => { keys[keyName] = true; });
+            el.addEventListener('mouseup', (e) => { keys[keyName] = false; });
+            el.addEventListener('mouseleave', (e) => { keys[keyName] = false; });
+        };
+
+        addTouch('btnLeft', 'left');
+        addTouch('btnRight', 'right');
+        addTouch('btnJump', 'up');
+        addTouch('btnShoot', 'shoot', true); 
+
+        // --- Функции смены экранов (С обновлением high score) ---
+
+        function showScreen(screenId) {
+            document.querySelectorAll('.game-screen').forEach(screen => {
+                screen.style.display = 'none';
+            });
+            const infoText = document.getElementById('infoText');
+            infoText.style.display = 'none'; 
+            
+            document.getElementById(screenId).style.display = (screenId === 'gameCanvas' || screenId === 'menuScreen' || screenId === 'wardrobeScreen') ? 'flex' : 'block';
+            
+            document.getElementById('controls').style.display = (screenId === 'gameCanvas') ? 'flex' : 'none';
+        }
+
+        function showMenu() {
+            gameState = 'MENU';
+            showScreen('menuScreen');
+            document.getElementById('highScore').textContent = localStorage.getItem('burr_highScore') || 0;
+        }
+
+        function showWardrobe() {
+            gameState = 'WARDROBE';
+            showScreen('wardrobeScreen');
+            renderSkins();
+            renderBulletColors();
+            setActiveTab('Colors'); // Показываем цвета по умолчанию
+        }
+
+        function startGame() {
+            gameState = 'PLAYING';
+            showScreen('gameCanvas'); 
+            initLevel();
+            loop();
+        }
+
+        // --- Гардероб (ОБНОВЛЕНО: Две секции) ---
+
+        document.getElementById('tabColors').addEventListener('click', () => setActiveTab('Colors'));
+        document.getElementById('tabBullets').addEventListener('click', () => setActiveTab('Bullets'));
+
+        function setActiveTab(tab) {
+            document.getElementById('tabColors').classList.remove('active');
+            document.getElementById('tabBullets').classList.remove('active');
+            document.getElementById('skinContainer').classList.remove('active');
+            document.getElementById('bulletContainer').classList.remove('active');
+
+            if (tab === 'Colors') {
+                document.getElementById('tabColors').classList.add('active');
+                document.getElementById('skinContainer').classList.add('active');
+            } else {
+                document.getElementById('tabBullets').classList.add('active');
+                document.getElementById('bulletContainer').classList.add('active');
+            }
+        }
+
+        function renderSkins() {
+            const container = document.getElementById('skinContainer');
+            container.innerHTML = '';
+
+            availableSkins.forEach(skin => {
+                const div = document.createElement('div');
+                div.className = 'skin-option';
+                if (currentSkinId === skin.id) {
+                    div.classList.add('selected');
+                }
+                div.setAttribute('data-skin-id', skin.id);
+                div.onclick = () => selectSkin(skin.id, skin.color);
+
+                const colorDiv = document.createElement('div');
+                colorDiv.className = 'skin-color';
+                colorDiv.style.backgroundColor = skin.color;
+                div.appendChild(colorDiv);
+                
+                container.appendChild(div);
+            });
+        }
+
+        function renderBulletColors() {
+            const container = document.getElementById('bulletContainer');
+            container.innerHTML = '';
+
+            availableBulletColors.forEach(bullet => {
+                const div = document.createElement('div');
+                div.className = 'skin-option';
+                if (currentBulletId === bullet.id) {
+                    div.classList.add('selected');
+                }
+                div.setAttribute('data-bullet-id', bullet.id);
+                div.onclick = () => selectBulletColor(bullet.id, bullet.color);
+
+                const colorDiv = document.createElement('div');
+                colorDiv.className = 'bullet-preview';
+                colorDiv.style.backgroundColor = bullet.color;
+                div.appendChild(colorDiv);
+                
+                container.appendChild(div);
+            });
+        }
+
+        function selectSkin(skinId, color) {
+            currentSkinId = skinId;
+            currentSkinColor = color; 
+            document.querySelectorAll('#skinContainer .skin-option').forEach(el => {
+                el.classList.remove('selected');
+                if (el.getAttribute('data-skin-id') === skinId) {
+                    el.classList.add('selected');
+                }
+            });
+        }
+        
+        function selectBulletColor(bulletId, color) {
+            currentBulletId = bulletId;
+            currentBulletColor = color; 
+            document.querySelectorAll('#bulletContainer .skin-option').forEach(el => {
+                el.classList.remove('selected');
+                if (el.getAttribute('data-bullet-id') === bulletId) {
+                    el.classList.add('selected');
+                }
+            });
+        }
+
+        // Привязка кнопок меню/гардероба и иконка информации (Без изменений)
+        document.getElementById('startButton').addEventListener('click', startGame);
+        document.getElementById('wardrobeButton').addEventListener('click', showWardrobe);
+        document.getElementById('backToMenuButton').addEventListener('click', showMenu);
+        
+        const infoIcon = document.getElementById('infoIcon');
+        const infoText = document.getElementById('infoText');
+
+        infoIcon.addEventListener('click', () => {
+            if (infoText.style.display === 'none' || infoText.style.display === '') {
+                infoText.style.display = 'block';
+            } else {
+                infoText.style.display = 'none';
+            }
+        });
+        
+        const chatBox = document.getElementById('chatBox');
+
+        function showChat(message, duration = 2000) {
+            chatBox.textContent = message;
+            chatBox.style.opacity = '1';
+            setTimeout(() => {
+                chatBox.style.opacity = '0';
+            }, duration);
+        }
+
+        // --- 3. ЛОГИКА ИГРЫ И КОЛЛИЗИИ (Критически обновлено) ---
+
+        function initLevel() {
+            player.hp = 3;
+            player.x = 100;
+            player.y = 100;
+            player.vx = 0;
+            player.vy = 0;
+            player.jumpsLeft = player.maxJumps;
+            bullets = [];
+            targets = [];
+            enemies = [];
+            score = 0;
+            lastScoredBlock = 0;
+            pusheenSpawned = false;
+            pusheenDefeated = false;
+            
+            updateHearts();
+
+            platforms = [];
+            
+            // Начальная земля (5 блоков)
+            for(let i=0; i<5; i++) {
+                platforms.push({ x: i * TILE_SIZE, y: canvas.height - TILE_SIZE, width: TILE_SIZE, height: TILE_SIZE });
+            }
+            
+            // Добавляем стартовую платформу для пасхалки назад
+            platforms.push({ x: -TILE_SIZE, y: canvas.height - TILE_SIZE, width: TILE_SIZE, height: TILE_SIZE });
+            platforms.push({ x: -2*TILE_SIZE, y: canvas.height - TILE_SIZE, width: TILE_SIZE, height: TILE_SIZE });
+            platforms.push({ x: -3*TILE_SIZE, y: canvas.height - TILE_SIZE, width: TILE_SIZE, height: TILE_SIZE });
+
+
+            let currentX = 5 * TILE_SIZE;
+            
+            // Генерация уровня
+            for(let i=0; i<80; i++) {
+                const rand = Math.random();
+
+                if (rand < 0.2) { 
+                    currentX += TILE_SIZE * 2;
+                } else if (rand < 0.8) {
+                    let length = Math.floor(Math.random() * 4) + 2; 
+                    let platformStartY = canvas.height - TILE_SIZE;
+                    
+                    for(let j=0; j<length; j++) {
+                        platforms.push({ x: currentX, y: platformStartY, width: TILE_SIZE, height: TILE_SIZE });
+                        
+                        if (j === Math.floor(length/2) && Math.random() < 0.5) {
+                            targets.push({
+                                x: currentX,
+                                y: platformStartY - TILE_SIZE,
+                                width: TILE_SIZE,
+                                height: TILE_SIZE,
+                                hp: 2
+                            });
+                        }
+                        
+                        if (j === 0 && length >= 3 && Math.random() < 0.3) {
+                            enemies.push({
+                                x: currentX + 10, 
+                                y: platformStartY - 30, 
+                                width: 30,
+                                height: 30,
+                                type: 'spike'
+                            });
+                        }
+
+                        currentX += TILE_SIZE;
+                    }
+                    
+                    if (length > 3) {
+                        currentX += TILE_SIZE * 2;
+                    }
+
+                } else {
+                    currentX += TILE_SIZE * 3;
+                    let pX = currentX;
+                    let pY = canvas.height - TILE_SIZE * (Math.floor(Math.random() * 3) + 3);
+                    
+                    platforms.push({ x: pX, y: pY, width: TILE_SIZE * 2, height: TILE_SIZE });
+                    
+                    if (Math.random() < 0.5) {
+                         enemies.push({
+                            x: pX + 10, 
+                            y: pY - 30,
+                            width: 30,
+                            height: 30,
+                            type: 'spike'
+                        });
+                    }
+                    
+                    if (Math.random() < 0.5) {
+                         targets.push({
+                            x: pX + TILE_SIZE, 
+                            y: pY - TILE_SIZE,
+                            width: TILE_SIZE,
+                            height: TILE_SIZE,
+                            hp: 2
+                        });
+                    }
+
+                    currentX += TILE_SIZE * 2;
+                }
+                currentX += TILE_SIZE; 
+            }
+        }
+
+        // Обнаружение столкновений AABB (без изменений)
+        function checkCollision(r1, r2) {
+            return (r1.x < r2.x + r2.width &&
+                    r1.x + r1.width > r2.x &&
+                    r1.y < r2.y + r2.height &&
+                    r1.y + r1.height > r2.y);
+        }
+
+        // Обработка столкновений игрока (Обновлено: сброс прыжков)
+        function handleSolidCollision(r1, r2) {
+            if (!checkCollision(r1, r2)) return false;
+
+            const dx = (r1.x + r1.width / 2) - (r2.x + r2.width / 2);
+            const dy = (r1.y + r1.height / 2) - (r2.y + r2.height / 2);
+            
+            const combinedHalfWidths = r1.width / 2 + r2.width / 2;
+            const combinedHalfHeights = r1.height / 2 + r2.height / 2;
+            
+            const overlapX = combinedHalfWidths - Math.abs(dx);
+            const overlapY = combinedHalfHeights - Math.abs(dy);
+            
+            if (overlapX < overlapY) {
+                if (dx > 0) {
+                    r1.x += overlapX; 
+                } else {
+                    r1.x -= overlapX;
+                }
+                r1.vx = 0;
+            } else {
+                if (dy > 0) {
+                    r1.y += overlapY;
+                    r1.vy = 0;
+                } else {
+                    r1.y -= overlapY;
+                    r1.vy = 0;
+                    r1.grounded = true;
+                    r1.jumpsLeft = r1.maxJumps; 
+                }
+            }
+            return true;
+        }
+
+
+        function shoot() {
+            if (gameState !== 'PLAYING' || !canShoot) return;
+            
+            const bSpeed = player.facingRight ? 15 : -15; 
+            
+            bullets.push({
+                x: player.x + player.width / 2,
+                y: player.y + player.height / 2 - 5, 
+                vx: bSpeed,
+                width: 20,
+                height: 10,
+                life: 60,
+                color: currentBulletColor 
+            });
+            
+            canShoot = false;
+            player.cooldownTimer = shootCooldown; 
+        }
+
+        function update() {
+            if (gameState !== 'PLAYING') return;
+
+            // 1. Управление стрельбой
+            if (keys.shoot) {
+                shoot();
+            }
+
+            if (player.cooldownTimer > 0) {
+                player.cooldownTimer--;
+            } else if (player.cooldownTimer === 0) {
+                canShoot = true;
+            }
+
+            // 2. Движение игрока и Гравитация
+            if (keys.left) { player.vx = -player.speed; player.facingRight = false; } 
+            else if (keys.right) { player.vx = player.speed; player.facingRight = true; } 
+            else { player.vx = 0; }
+
+            // Логика прыжка и двойного прыжка
+            if (keys.up) {
+                if (player.grounded) {
+                    player.vy = player.jumpPower;
+                    player.grounded = false;
+                    player.jumpsLeft--;
+                } else if (player.jumpsLeft > 0) {
+                    player.vy = player.jumpPower; 
+                    player.jumpsLeft--;
+                }
+            }
+            if (player.vy < 0) {
+                keys.up = false;
+            }
+
+
+            player.vy += GRAVITY;
+            if(player.vy > TERMINAL_VELOCITY) player.vy = TERMINAL_VELOCITY;
+
+            // Применяем скорость
+            player.x += player.vx;
+            player.y += player.vy;
+
+            // 3. Пасхалка (Pusheen)
+            if (!pusheenSpawned && player.x < 50) {
+                pusheenSpawned = true;
+                enemies.push(pusheenEnemy);
+                showChat('Pusheen: "я вижу тебя. А ты меня?"');
+            }
+            
+            if (pusheenSpawned && !pusheenDefeated) {
+                if (pusheenEnemy.hp <= 0 && !pusheenDefeated) {
+                    pusheenDefeated = true;
+                    showChat('Игрок: "Даже не вспотел!"', 2500);
+                    setTimeout(() => {
+                        showChat('Pusheen: "приивееет!!"');
+                    }, 3000);
+                }
+            }
+            
+
+            // 4. Коллизии 
+            player.grounded = false;
+            
+            platforms.forEach(p => handleSolidCollision(player, p));
+            targets.forEach(t => handleSolidCollision(player, t));
+
+
+            // 5. Упал в пропасть
+            if (player.y > canvas.height + 100) {
+                takeDamage(3);
+            }
+            
+            // Начисление очков за прохождение
+            const currentBlock = Math.floor(player.x / TILE_SIZE);
+            if (currentBlock > lastScoredBlock + 3) {
+                score += 10;
+                lastScoredBlock = currentBlock;
+            }
+
+
+            // 6. Обновление Пуль и Коллизии Пуля-Цель
+            for (let i = bullets.length - 1; i >= 0; i--) {
+                let b = bullets[i];
+                b.x += b.vx;
+                b.life--;
+                
+                let hitTarget = false;
+                
+                // Проверка целей (Синие кубики)
+                for (let j = targets.length - 1; j >= 0; j--) {
+                    let t = targets[j];
+                    if (checkCollision(b, t)) {
+                        t.hp--;
+                        score += 5; 
+                        hitTarget = true;
+                        
+                        if (t.hp <= 0) {
+                            targets.splice(j, 1);
+                            score += 50;
+                        }
+                        break; 
+                    }
+                }
+                
+                // Проверка Pusheen
+                if (pusheenSpawned && !pusheenDefeated && checkCollision(b, pusheenEnemy)) {
+                    pusheenEnemy.hp--;
+                    score += 1; 
+                    hitTarget = true;
+                }
+
+
+                // Удаление пули
+                if (b.life <= 0 || hitTarget) {
+                    bullets.splice(i, 1);
+                    continue;
+                }
+            }
+
+            // 7. Шипы (Проверка урона)
+            if (player.invulnerable > 0) player.invulnerable--;
+
+            for (let i = enemies.length - 1; i >= 0; i--) {
+                let e = enemies[i];
+                if (checkCollision(player, e)) {
+                    if (e.type === 'spike') {
+                        takeDamage(1);
+                        break;
+                    } else if (e.type === 'pusheen' && !pusheenDefeated) {
+                        takeDamage(3); 
+                        break;
+                    }
+                }
+                
+                // Удаляем Pusheen после победы
+                if (e.type === 'pusheen' && pusheenDefeated) {
+                    enemies.splice(i, 1);
+                }
+            }
+
+            // 8. Камера
+            let targetCamX = player.x - canvas.width / 2 + player.width / 2;
+            if (targetCamX < 0) targetCamX = 0;
+            cameraX += (targetCamX - cameraX) * 0.1; 
+        }
+
+        // --- Урон и Интерфейс (С обновлением high score) ---
+
+        function takeDamage(amount) {
+            if (player.invulnerable > 0) return;
+
+            player.hp -= amount;
+            player.invulnerable = 60; 
+            player.vy = -5; 
+            
+            updateHearts();
+
+            if (player.hp <= 0) {
+                gameState = 'GAMEOVER';
+                if (score > highScore) {
+                    highScore = score;
+                    localStorage.setItem('burr_highScore', highScore);
+                }
+                showCustomMessage(`Игра окончена! Счет: ${score}. Рекорд: ${highScore}`, () => {
+                    location.reload();
+                });
+            }
+        }
+
+        function showCustomMessage(message, callback) {
+            const overlay = document.createElement('div');
+            overlay.style.cssText = 'position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); z-index:100; display:flex; justify-content:center; align-items:center;';
+            const box = document.createElement('div');
+            box.style.cssText = 'background:white; padding:30px; border-radius:10px; text-align:center; font-size:20px; color:#333; max-width: 80%; font-family: monospace;';
+            const buttonCallback = callback.toString().replace('function () {', '').replace('}', '');
+            box.innerHTML = `<p>${message}</p><button onclick="this.parentNode.parentNode.remove(); ${buttonCallback}" style="padding:10px 20px; background:#4CAF50; color:white; border:none; border-radius:5px; margin-top:15px; cursor:pointer; font-family: monospace;">ОК</button>`;
+            overlay.appendChild(box);
+            document.body.appendChild(overlay);
+        }
+
+        function updateHearts() {
+            const ui = document.getElementById('uiLayer');
+            ui.innerHTML = '';
+            for(let i=0; i<player.hp; i++) {
+                const heart = document.createElement('span');
+                heart.className = 'heart';
+                heart.innerHTML = '♥️'; /* V5.0.2: Изменено с ❤️ на ♥️ */
+                heart.style.fontSize = '30px';
+                ui.appendChild(heart);
+            }
+        }
+
+        // --- 4. ОТРИСОВКА (ОБНОВЛЕНО) ---
+
+        function draw() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            ctx.save();
+            ctx.translate(-cameraX, 0);
+
+            // Рисуем Платформы
+            for (let p of platforms) {
+                if (assets.ground.complete && assets.ground.naturalHeight !== 0) {
+                     ctx.drawImage(assets.ground, p.x, p.y, p.width, p.height);
+                } else {
+                    ctx.fillStyle = '#654321';
+                    ctx.fillRect(p.x, p.y, p.width, p.height);
+                    ctx.fillStyle = '#00FF00'; 
+                    ctx.fillRect(p.x, p.y, p.width, 10);
+                }
+            }
+
+            // Рисуем Цели (Синие Кубики)
+            for (let t of targets) {
+                ctx.fillStyle = `rgba(0, 0, 255, ${t.hp / 2})`; 
+                ctx.fillRect(t.x, t.y, t.width, t.height);
+                if (assets.ground.complete && assets.ground.naturalHeight !== 0) {
+                    ctx.globalAlpha = 0.2; 
+                    ctx.drawImage(assets.ground, t.x, t.y, t.width, t.height);
+                    ctx.globalAlpha = 1.0;
+                }
+                
+                ctx.fillStyle = 'white';
+                ctx.font = 'bold 20px monospace';
+                ctx.fillText(t.hp, t.x + t.width / 2 - 5, t.y + t.height / 2 + 5);
+            }
+
+            // Рисуем Шипы и Pusheen
+            for (let e of enemies) {
+                if (e.type === 'spike') {
+                    if (assets.spike.complete && assets.spike.naturalHeight !== 0) {
+                        ctx.drawImage(assets.spike, e.x, e.y, e.width, e.height);
+                    } else {
+                        ctx.fillStyle = 'purple';
+                        ctx.beginPath();
+                        ctx.moveTo(e.x, e.y + e.height);
+                        ctx.lineTo(e.x + e.width/2, e.y);
+                        ctx.lineTo(e.x + e.width, e.y + e.height);
+                        ctx.fill();
+                    }
+                } else if (e.type === 'pusheen') {
+                    if (!pusheenDefeated) {
+                        // Отрисовка Pusheen (злодей)
+                        ctx.fillStyle = 'darkred'; 
+                        ctx.fillRect(e.x, e.y, e.width, e.height);
+                        ctx.fillStyle = 'white';
+                        ctx.font = 'bold 16px monospace';
+                        ctx.fillText(`BOSS ${e.hp}`, e.x, e.y - 5);
+                    } else {
+                        // Отрисовка Pusheen (милый котик)
+                        ctx.fillStyle = 'pink'; 
+                        ctx.fillRect(e.x, e.y, e.width, e.height);
+                        ctx.fillStyle = 'black';
+                        ctx.font = 'bold 16px monospace';
+                        ctx.fillText(`PUSHEEN`, e.x, e.y - 5);
+                    }
+                }
+            }
+
+            // Рисуем Пули (V5.1: Цвет пули)
+            for (let b of bullets) {
+                ctx.fillStyle = b.color;
+                ctx.fillRect(b.x, b.y, b.width, b.height);
+            }
+
+            // Рисуем Игрока
+            if (player.invulnerable % 10 < 5) { 
+                ctx.fillStyle = currentSkinColor; 
+                ctx.fillRect(player.x, player.y, player.width, player.height);
+            }
+            
+            // V5.1: Индикатор прыжка
+            if (!player.grounded && player.jumpsLeft > 0) {
+                const barX = player.x + player.width / 2 - 25;
+                const barY = player.y - 15;
+                const barW = 50;
+                const barH = 5;
+                const jumpRatio = player.jumpsLeft / player.maxJumps;
+                
+                // Красная полоса (общий прыжок)
+                ctx.fillStyle = 'rgba(255, 0, 0, 0.7)';
+                ctx.fillRect(barX, barY, barW, barH);
+                
+                // Зеленая полоса (двойной прыжок)
+                if (player.jumpsLeft === 1) { 
+                    ctx.fillStyle = 'rgba(0, 255, 0, 0.7)';
+                    ctx.fillRect(barX + barW * (1 - jumpRatio), barY, barW * jumpRatio, barH);
+                }
+
+                ctx.strokeStyle = '#000';
+                ctx.lineWidth = 1;
+                ctx.strokeRect(barX, barY, barW, barH);
+            }
+
+
+            // Рисуем Версию и Счет
+            ctx.restore();
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
+            ctx.font = 'bold 16px monospace';
+            ctx.fillText('V5.0.2', canvas.width - 70, 20); /* V5.0.2: Обновлена версия */
+
+            ctx.fillStyle = '#333';
+            ctx.fillText(`СЧЕТ: ${score}`, 10, 50);
+            ctx.fillText(`РЕКОРД: ${highScore}`, 10, 70);
+        }
+
+        // ГЛАВНЫЙ ЦИКЛ
+        function loop() {
+            update();
+            draw();
+            if (gameState === 'PLAYING') {
+                requestAnimationFrame(loop);
+            }
+        }
+
+        window.onload = function() {
+            showMenu();
+            // Инициализация цветов
+            const initialSkin = availableSkins.find(skin => skin.id === currentSkinId);
+            if(initialSkin) { currentSkinColor = initialSkin.color; }
+            const initialBullet = availableBulletColors.find(b => b.id === currentBulletId);
+            if(initialBullet) { currentBulletColor = initialBullet.color; }
+        };
+
+    </script>
+</body>
+</html>
