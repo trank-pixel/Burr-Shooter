@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title data-translate="title">Burr Game V5.3 </title>
+    <title data-translate="title">Burr Game V5.3.1</title>
     <style>
         /* --- Base & Body --- */
         body {
@@ -84,7 +84,7 @@
         .btn-warning { background-color: #ffdcbe; color: #5d4200; }
         .btn-info { background-color: #4fd8eb; color: #00363d; }
         
-        /* Language Toggle */
+        /* Language Toggle & Stats Button */
         #langToggle {
             position: absolute;
             top: 15px;
@@ -100,6 +100,27 @@
         }
         #langToggle:hover {
             background-color: #5d6166;
+        }
+        
+        /* НОВАЯ Кнопка Статистики (M3 Expressive) */
+        #statsButton {
+            position: absolute;
+            bottom: 15px;
+            left: 15px;
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            background-color: #ffb74d; /* Light orange */
+            color: #2c2e30;
+            border: none;
+            font-size: 24px;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.4);
+            transition: transform 0.1s, box-shadow 0.2s;
+        }
+        #statsButton:active {
+            transform: scale(0.9);
         }
 
 
@@ -146,42 +167,7 @@
             font-weight: 900;
         }
         
-        /* V5.3: CSS Shape Styles */
-        .shape-s_rect { border-radius: 10px; }
-        .shape-s_circle { border-radius: 50%; }
-        .shape-s_tri { 
-            background: none !important; 
-            width: 0; height: 0; 
-            border-left: 30px solid transparent;
-            border-right: 30px solid transparent;
-            border-bottom: 52px solid #fff; 
-            margin-top: -10px;
-        }
-
-        .shape-s_puffy { 
-            background-color: #fff;
-            border-radius: 30% / 40%; 
-        }
-        
-        .shape-s_diamond {
-            background-color: #fff;
-            clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%); /* Использование clip-path для ромба */
-            transform: none; /* Удаление rotate */
-        }
-
-        .shape-s_sun {
-            background-color: #fff;
-            border-radius: 50%;
-            clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 70% 60%, 80% 95%, 50% 70%, 20% 95%, 30% 60%, 2% 35%, 39% 35%);
-        }
-
-        .shape-s_cookie {
-            background-color: #fff;
-            border-radius: 40% 60% 40% 60% / 60% 40% 60% 40%;
-        }
-
-        /* V5.2: Color Picker Style */
-        /* Объединенные стили для пикеров скина и пули */
+        /* Color Picker Style */
         .color-picker-card #customSkinColorPicker, 
         #customColorPicker {
             -webkit-appearance: none;
@@ -283,8 +269,8 @@
         }
 
 
-        /* Game Over Modal */
-        #gameOverModal {
+        /* Modals */
+        .modal {
             display: none;
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
@@ -299,7 +285,13 @@
             border-radius: 28px;
             text-align: center;
             color: white;
+            max-width: 90%;
+            width: 400px;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.6);
         }
+        .modal-content h2 { color: #ffb74d; }
+        .modal-content p { font-size: 18px; margin: 10px 0; }
+
     </style>
 </head>
 <body>
@@ -307,7 +299,7 @@
     <div id="menuScreen" class="game-screen">
         <div class="menu-container">
             <button id="langToggle">EN</button> 
-            <h1 data-translate="title">BURR GAME V5.3</h1>
+            <h1 data-translate="title">BURR GAME V5.3.1</h1>
             <p style="color:#c4c7c5; font-size: 14px;" data-translate="version_note"></p>
 
             <h3 data-translate="mode_title"></h3>
@@ -322,18 +314,22 @@
             </div>
             
             <p style="margin-top:5px; color:#4CAF50;"><span data-translate="record"></span> <span id="highScore">0</span></p>
+            
+            <button id="statsButton" onclick="openStatsModal()">📊</button>
         </div>
     </div>
 
     <div id="wardrobeScreen" class="game-screen" style="display:none;">
         <div class="menu-container">
             <h2 data-translate="skins"></h2>
-            <h3 data-translate="color_title"></h3> <div id="skinColorContainer" class="grid-container">
+            <h3 data-translate="color_title"></h3> 
+            <div id="skinColorContainer" class="grid-container">
                  <div class="option-card color-picker-card" style="border-radius: 20px;">
                     <input type="color" id="customSkinColorPicker" value="#FF0000" onchange="setCustomSkinColor(this.value)">
                 </div>
             </div>
-            <h3 data-translate="presets_title"></h3> <div id="skinContainer" class="grid-container"></div>
+            <h3 data-translate="presets_title"></h3> 
+            <div id="skinContainer" class="grid-container"></div>
             <button class="menu-button btn-danger" onclick="showMenu()" data-translate="back"></button>
         </div>
     </div>
@@ -359,13 +355,29 @@
     <div id="uiLayer"></div>
     <div id="chatBox"></div>
     
-    <div id="gameOverModal">
+    <div id="gameOverModal" class="modal">
         <div class="modal-content">
             <h2 style="color:#F44336" data-translate="game_over"></h2>
             <p id="gameOverText" style="font-size:20px; margin: 20px 0;"><span data-translate="score_label"></span> 0</p>
             <button class="menu-button btn-primary" onclick="location.reload()" data-translate="ok"></button>
         </div>
     </div>
+    
+    <div id="statsModal" class="modal">
+        <div class="modal-content">
+            <h2 data-translate="stats_title">Статистика</h2>
+            <p><span data-translate="stats_jumps">Всего прыжков:</span> <span id="statJumps">0</span></p>
+            <p><span data-translate="stats_fav_color">Любимый цвет:</span> <span id="statFavColor">#FF0000</span></p>
+            <p><span data-translate="stats_acc">Аккуратность ИИ:</span> <span id="statAcc">19.00%</span></p>
+            <hr style="border-top: 1px solid #43474e; margin: 15px 0;">
+            <h3><span data-translate="stats_records">Рекорды по режимам:</span></h3>
+            <p><span data-translate="mode_normal_s">Обычный:</span> <span id="statRecNormal">0</span></p>
+            <p><span data-translate="mode_hardened_s">Усложнённый:</span> <span id="statRecHardened">0</span></p>
+            <p><span data-translate="mode_hardcore_s">Хардкор:</span> <span id="statRecHardcore">0</span></p>
+            <button class="menu-button btn-primary" onclick="closeStatsModal()" data-translate="ok"></button>
+        </div>
+    </div>
+
 
     <div id="controls" style="display:none;">
         <div class="control-group">
@@ -378,12 +390,31 @@
     </div>
 
     <script>
-        // --- 1. ЛОКАЛИЗАЦИЯ (V5.3 UPDATE) ---
+        // --- 1. ГЛОБАЛЬНЫЕ НАСТРОЙКИ И СОХРАНЕНИЕ ---
+        
+        // --- Статистика по умолчанию ---
+        const defaultStats = {
+            totalJumps: 0,
+            autoAccuracy: 19.00,
+            colorUsage: {}, // {'#FF0000': 15, '#00FF00': 5}
+            records: { normal: 0, hardened: 0, hardcore: 0, auto: 0 }
+        };
+        
+        // Загрузка статистики или использование значений по умолчанию
+        let stats = JSON.parse(localStorage.getItem('burr_stats')) || defaultStats;
+        let highScore = localStorage.getItem('burr_highScore') || 0;
+        
+        function saveStats() {
+            localStorage.setItem('burr_stats', JSON.stringify(stats));
+            localStorage.setItem('burr_highScore', highScore);
+        }
+
+        // --- 2. ЛОКАЛИЗАЦИЯ (V5.3.1 UPDATE) ---
         const translations = {
             ru: {
-                title: 'BURR GAME V5.3', version_note: '(M3 Style + Colors Update)', mode_title: 'Режим игры:',
-                mode_normal: 'START Обычный (V5.0.2)', mode_hardened: 'HARDENED Усложнённый (HP x5)',
-                mode_hardcore: 'HARDCORE Хардкор (1 HP)', mode_auto: 'AUTO Автопилот', 
+                title: 'BURR GAME V5.3.1', version_note: '(Double Jump + Stats)', mode_title: 'Режим игры:',
+                mode_normal: 'START Обычный', mode_hardened: 'HARDENED Усложнённый',
+                mode_hardcore: 'HARDCORE Хардкор', mode_auto: 'AUTO Автопилот', 
                 skins: 'Скины', skins_btn: 'SKINS Скины', presets_title: 'Пресеты цвета:',
                 bullets: 'Пули', bullets_btn: 'BULLETS Пули',
                 record: 'Рекорд:', back: 'НАЗАД', color_title: 'Цвет:', shape_title: 'Форма:',
@@ -391,11 +422,13 @@
                 pusheen_chat_2: 'Pusheen: "приивееет!!" (мирный)', ai_stop: 'ИИ: Управление передано!',
                 ai_stopping: 'ИИ: Ищу безопасное место...', game_over: 'ИГРА ОКОНЧЕНА!', score_label: 'Счет:', ok: 'ОК',
                 current_score: 'СЧЕТ:', current_high_score: 'РЕКОРД:', current_mode: 'РЕЖИМ:',
+                stats_title: 'Статистика игрока', stats_jumps: 'Всего прыжков:', stats_fav_color: 'Любимый цвет:', stats_acc: 'Аккуратность ИИ:', stats_records: 'Рекорды по режимам:',
+                mode_normal_s: 'Обычный:', mode_hardened_s: 'Усложнённый:', mode_hardcore_s: 'Хардкор:', mode_auto_s: 'Автопилот:',
             },
             en: {
-                title: 'BURR GAME V5.3', version_note: '(M3 Style + Colors Update)', mode_title: 'Game Mode:',
-                mode_normal: 'START Normal (V5.0.2)', mode_hardened: 'HARDENED Hardened (HP x5)',
-                mode_hardcore: 'HARDCORE Hardcore (1 HP)', mode_auto: 'AUTO Autopilot', 
+                title: 'BURR GAME V5.3.1', version_note: '(Double Jump + Stats)', mode_title: 'Game Mode:',
+                mode_normal: 'START Normal', mode_hardened: 'HARDENED Hardened',
+                mode_hardcore: 'HARDCORE Hardcore', mode_auto: 'AUTO Autopilot', 
                 skins: 'Skins', skins_btn: 'SKINS Skins', presets_title: 'Color Presets:',
                 bullets: 'Bullets', bullets_btn: 'BULLETS Bullets',
                 record: 'High Score:', back: 'BACK', color_title: 'Color:', shape_title: 'Shape:',
@@ -403,6 +436,8 @@
                 pusheen_chat_2: 'Pusheen: "heeeelllooo!!" (peaceful)', ai_stop: 'AI: Controls handed over!',
                 ai_stopping: 'AI: Looking for a safe spot...', game_over: 'GAME OVER!', score_label: 'Score:', ok: 'OK',
                 current_score: 'SCORE:', current_high_score: 'HIGH SCORE:', current_mode: 'MODE:',
+                stats_title: 'Player Stats', stats_jumps: 'Total Jumps:', stats_fav_color: 'Favorite Color:', stats_acc: 'AI Accuracy:', stats_records: 'Mode Records:',
+                mode_normal_s: 'Normal:', mode_hardened_s: 'Hardened:', mode_hardcore_s: 'Hardcore:', mode_auto_s: 'Autopilot:',
             }
         };
 
@@ -420,7 +455,7 @@
                 }
             });
             
-            document.getElementById('highScore').textContent = localStorage.getItem('burr_highScore') || 0;
+            document.getElementById('highScore').textContent = highScore || 0;
             document.getElementById('langToggle').textContent = lang === 'ru' ? 'EN' : 'RU';
             
             if (document.getElementById('autopilotToggle') && document.getElementById('autopilotToggle').style.display !== 'none') {
@@ -457,7 +492,6 @@
         const heartContainer = document.getElementById('heartContainer');
 
 
-        // --- ОБНОВЛЕННЫЕ ПРЕСЕТЫ СКИНОВ ---
         const availableSkinPresets = [
             { id: 'cube_red', color: '#FF0000' }, 
             { id: 'cube_grey', color: '#808080' }, 
@@ -471,7 +505,6 @@
             { id: 's_puffy', name: '' }, { id: 's_diamond', name: '' }, { id: 's_sun', name: '' }, { id: 's_cookie', name: '' }
         ];
 
-        // Изначальный ID скина теперь не важен, важен только цвет
         let currentSkinColor = localStorage.getItem('skinColor') || '#FF0000';
         let currentBulletColor = localStorage.getItem('bulColor') || '#FFFF00';
         let currentBulletShape = localStorage.getItem('bulShape') || 's_rect';
@@ -498,14 +531,12 @@
             vx: 0, vy: 0, speed: 7, jumpPower: -16, 
             grounded: false, hp: 3, maxHp: 3,
             facingRight: true, invulnerable: 0, cooldownTimer: 0,
-            jumpsLeft: 1, maxJumps: 2
+            jumpsLeft: 1, maxJumps: 2 // ДВОЙНОЙ ПРЫЖОК
         };
 
         let bullets = [], enemies = [], targets = [], platforms = [];
         let cameraX = 0, score = 0, lastScoredBlock = 0;
-        let highScore = localStorage.getItem('burr_highScore') || 0;
         
-        let pusheenSpawned = false, pusheenDefeated = false;
         const pusheenEnemy = { x: -300, y: canvas.height - TILE_SIZE - 50, width: 50, height: 50, hp: 50, type: 'pusheen' };
 
         const keys = { left: false, right: false, up: false, shoot: false };
@@ -546,6 +577,8 @@
         // --- МЕНЮ И НАСТРОЙКИ ---
         function showScreen(id) {
             document.querySelectorAll('.game-screen').forEach(s => s.style.display = 'none');
+            // Только для меню показываем кнопку статистики
+            document.getElementById('statsButton').style.display = (id === 'menuScreen') ? 'block' : 'none';
             document.getElementById(id).style.display = 'flex';
             document.getElementById('controls').style.display = 'none';
             document.getElementById('autopilotToggle').style.display = 'none';
@@ -555,7 +588,8 @@
         function showMenu() {
             gameState = 'MENU';
             showScreen('menuScreen');
-            document.getElementById('highScore').textContent = localStorage.getItem('burr_highScore') || 0;
+            document.getElementById('highScore').textContent = highScore || 0;
+            saveStats(); // Сохраняем статистику при выходе в меню
         }
 
         function openWardrobe() { showScreen('wardrobeScreen'); renderSkins(); }
@@ -565,41 +599,35 @@
             renderBulletSettings(); 
         }
         
-        // --- НОВАЯ ФУНКЦИЯ ДЛЯ УСТАНОВКИ ПОЛЬЗОВАТЕЛЬСКОГО ЦВЕТА СКИНА ---
         function setCustomSkinColor(color) {
             currentSkinColor = color; 
             localStorage.setItem('skinColor', color);
-            renderSkins(color); // Перерисовываем для обновления выбора
+            renderSkins(color); 
         }
-
 
         function renderSkins(selectedColor = currentSkinColor) {
             const cColor = document.getElementById('skinColorContainer');
             const pickerCard = cColor.querySelector('.option-card');
             const picker = document.getElementById('customSkinColorPicker');
             
-            // 1. Устанавливаем текущий цвет и выделяем пикер
             picker.value = selectedColor; 
-            pickerCard.classList.add('selected'); // Выделяем пикер по умолчанию
+            pickerCard.classList.add('selected');
 
             const c = document.getElementById('skinContainer'); c.innerHTML = '';
             
-            // 2. Рендерим пресеты
             availableSkinPresets.forEach(s => {
                 const d = document.createElement('div'); d.className = 'option-card';
-                // Проверяем, совпадает ли текущий цвет с пресетом (для выделения)
                 if(selectedColor.toUpperCase() === s.color.toUpperCase()) {
                     d.classList.add('selected');
-                    pickerCard.classList.remove('selected'); // Если выбран пресет, снимаем выделение с пикера
+                    pickerCard.classList.remove('selected');
                 }
                 d.innerHTML = `<div class="color-preview" style="background:${s.color}"></div>`;
                 d.onclick = () => { 
-                    setCustomSkinColor(s.color); // Устанавливаем цвет из пресета
+                    setCustomSkinColor(s.color);
                 };
                 c.appendChild(d);
             });
             
-            // Если выбранный цвет не совпал ни с одним пресетом, выделяем пикер
             let isPresetSelected = availableSkinPresets.some(s => s.color.toUpperCase() === selectedColor.toUpperCase());
             if (!isPresetSelected) {
                 pickerCard.classList.add('selected');
@@ -612,7 +640,6 @@
         function setCustomBulletColor(color) {
             currentBulletColor = color; 
             localStorage.setItem('bulColor', color);
-            // Если выбран новый цвет, нужно убедиться, что пикер выглядит выбранным
             document.getElementById('bulletColorContainer').querySelector('.option-card').classList.add('selected');
             renderBulletSettings(); 
         }
@@ -620,7 +647,7 @@
         function renderBulletSettings() {
             const cColor = document.getElementById('bulletColorContainer'); 
             const pickerCard = cColor.querySelector('.option-card');
-            pickerCard.classList.add('selected'); // Пикер всегда выбран, так как это основной способ выбора
+            pickerCard.classList.add('selected'); 
             
             const picker = document.getElementById('customColorPicker');
             picker.value = currentBulletColor; 
@@ -648,6 +675,45 @@
                 cShape.appendChild(d);
             });
         }
+        
+        // --- НОВАЯ ЛОГИКА СТАТИСТИКИ ---
+        
+        function getFavoriteColor() {
+            let maxCount = -1;
+            let favColor = currentSkinColor; // По умолчанию - текущий
+            
+            for (const color in stats.colorUsage) {
+                if (stats.colorUsage[color] > maxCount) {
+                    maxCount = stats.colorUsage[color];
+                    favColor = color;
+                }
+            }
+            return favColor;
+        }
+
+        function openStatsModal() {
+            const t = translations[currentLang];
+            
+            // Загрузка и форматирование данных
+            const favColor = getFavoriteColor();
+            const acc = stats.autoAccuracy.toFixed(2);
+            
+            document.getElementById('statJumps').textContent = stats.totalJumps;
+            document.getElementById('statFavColor').textContent = favColor;
+            document.getElementById('statFavColor').style.color = favColor; // Выделение цвета
+            document.getElementById('statAcc').textContent = `${acc}%`;
+            
+            document.getElementById('statRecNormal').textContent = stats.records.normal;
+            document.getElementById('statRecHardened').textContent = stats.records.hardened;
+            document.getElementById('statRecHardcore').textContent = stats.records.hardcore;
+            
+            document.getElementById('statsModal').style.display = 'flex';
+        }
+
+        function closeStatsModal() {
+            document.getElementById('statsModal').style.display = 'none';
+        }
+
 
         function startGame(mode) {
             gameMode.type = mode;
@@ -673,21 +739,31 @@
                 document.getElementById('controls').style.display = 'flex';
             }
 
+            // Учет использования цвета
+            const colorKey = currentSkinColor.toUpperCase();
+            stats.colorUsage[colorKey] = (stats.colorUsage[colorKey] || 0) + 1;
+            
             gameState = 'PLAYING';
             initLevel();
             loop();
         }
 
-        // --- ИГРОВАЯ ЛОГИКА (ОСТАЛЬНЫЕ ФУНКЦИИ БЕЗ ИЗМЕНЕНИЙ) ---
+        // --- ИГРОВАЯ ЛОГИКА ---
 
         function disableAutopilotManual() {
             if(gameMode.autoState === 'active') {
+                // Увеличение аккуратности ИИ на 0.3%
+                stats.autoAccuracy = Math.min(100, stats.autoAccuracy + 0.3); 
+                
                 gameMode.autoState = 'stopping';
                 document.getElementById('autopilotToggle').textContent = translations[currentLang].ai_stopping;
                 showChat(translations[currentLang].ai_stopping);
+                saveStats();
             }
         }
-
+        
+        // ... (runAutopilot и initLevel без изменений) ...
+        
         function runAutopilot() {
             if (gameMode.autoState === 'off') return;
             
@@ -772,9 +848,6 @@
             }
         }
 
-        function checkCollision(r1, r2) {
-            return (r1.x < r2.x + r2.width && r1.x + r1.width > r2.x && r1.y < r2.y + r2.height && r1.y + r1.height > r2.y);
-        }
 
         function handleSolidCollision(r1, r2) {
             if (!checkCollision(r1, r2)) return false;
@@ -798,11 +871,9 @@
             const bSpeed = player.facingRight ? 15 : -15; 
             
             let bulletWidth = 20, bulletHeight = 10;
-            // V5.3: Установка размеров пули
             if (currentBulletShape === 's_circle' || currentBulletShape === 's_puffy' || currentBulletShape === 's_diamond' || currentBulletShape === 's_sun' || currentBulletShape === 's_cookie') {
                  bulletWidth = bulletHeight = 20;
             }
-
 
             bullets.push({ 
                 x: player.x + player.width / 2, y: player.y + player.height / 2 - 5, 
@@ -827,10 +898,28 @@
             else { player.vx = 0; }
 
             if (keys.up) {
-                if (player.grounded) { player.vy = player.jumpPower; player.grounded = false; player.jumpsLeft--; } 
-                else if (player.jumpsLeft > 0 && !gameMode.isAuto) { player.vy = player.jumpPower; player.jumpsLeft--; keys.up = false; }
-                else if (gameMode.isAuto && player.jumpsLeft > 0 && player.vy > 0) { player.vy = player.jumpPower; player.jumpsLeft--; }
+                if (player.grounded) { 
+                    player.vy = player.jumpPower; 
+                    player.grounded = false; 
+                    player.jumpsLeft--; 
+                    stats.totalJumps++; // Учет прыжка
+                    keys.up = false; // Отключаем, чтобы не было постоянного прыжка
+                } 
+                else if (player.jumpsLeft > 0) { 
+                    player.vy = player.jumpPower; 
+                    player.jumpsLeft--; 
+                    stats.totalJumps++; // Учет прыжка
+                    keys.up = false; // Ключевое изменение для двойного прыжка
+                }
+                
+                // Для автопилота:
+                else if (gameMode.isAuto && player.jumpsLeft > 0 && player.vy > 0) { 
+                     player.vy = player.jumpPower; 
+                     player.jumpsLeft--;
+                     stats.totalJumps++; // Учет прыжка
+                }
             }
+
 
             player.vy += GRAVITY;
             if(player.vy > TERMINAL_VELOCITY) player.vy = TERMINAL_VELOCITY;
@@ -881,7 +970,16 @@
             player.hp -= amount; player.invulnerable = 60; player.vy = -5; updateHearts();
             if (player.hp <= 0) {
                 gameState = 'GAMEOVER';
-                if (score > highScore) { highScore = score; localStorage.setItem('burr_highScore', highScore); }
+                
+                // Обновление рекордов
+                const modeKey = gameMode.type;
+                if (score > stats.records[modeKey]) {
+                    stats.records[modeKey] = score;
+                }
+                // Обновление общего рекорда
+                if (score > highScore) { highScore = score; }
+                
+                saveStats(); // Сохранение обновленных рекордов
                 
                 const t = translations[currentLang];
                 document.getElementById('gameOverText').innerHTML = `${t.score_label} ${score} | ${t.record}: ${highScore}`;
@@ -904,9 +1002,11 @@
             }
         }
 
-        // --- ОТРИСОВКА (V5.3 FIX) ---
+        // --- ОТРИСОВКА ---
         
-        // Вспомогательная функция для отрисовки звезд/лучей
+        function checkCollision(r1, r2) {
+            return (r1.x < r2.x + r2.width && r1.x + r1.width > r2.x && r1.y < r2.y + r2.height && r1.y + r1.height > r2.y);
+        }
         function drawStar(ctx, cx, cy, spikes, outerRadius, innerRadius) {
             let rot = Math.PI / 2 * 3;
             let x = cx;
@@ -929,8 +1029,6 @@
             ctx.closePath();
             ctx.fill();
         }
-
-        // Вспомогательная функция для отрисовки "мягкого" прямоугольника (Squircle/Cookie)
         function drawRoundedRect(ctx, x, y, w, h, radius) {
             let r = radius; 
             if (r > w / 2) r = w / 2;
@@ -955,7 +1053,6 @@
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             ctx.save(); ctx.translate(-cameraX, 0);
 
-            // ... (Отрисовка платформ, таргетов, врагов - без изменений)
             for (let p of platforms) {
                 if (assets.ground.complete && assets.ground.naturalHeight !== 0) ctx.drawImage(assets.ground, p.x, p.y, p.width, p.height);
                 else { ctx.fillStyle = '#654321'; ctx.fillRect(p.x, p.y, p.width, p.height); ctx.fillStyle = '#00FF00'; ctx.fillRect(p.x, p.y, p.width, 10); }
@@ -986,7 +1083,6 @@
             for (let b of bullets) {
                 ctx.fillStyle = b.color;
                 
-                // V5.3: Исправленная отрисовка фигур
                 if (b.shape === 's_circle') { 
                     ctx.beginPath(); 
                     ctx.arc(b.x + b.width/2, b.y + b.height/2, b.width/2, 0, Math.PI * 2); 
@@ -997,39 +1093,43 @@
                     else { ctx.moveTo(b.x + b.width, b.y); ctx.lineTo(b.x, b.y + b.height / 2); ctx.lineTo(b.x + b.width, b.y + b.height); }
                     ctx.fill();
                 } else if (b.shape === 's_diamond') {
-                    // Точная отрисовка ромба
                     let cx = b.x + b.width / 2;
                     let cy = b.y + b.height / 2;
                     ctx.beginPath();
-                    ctx.moveTo(cx, b.y); // Top
-                    ctx.lineTo(b.x + b.width, cy); // Right
-                    ctx.lineTo(cx, b.y + b.height); // Bottom
-                    ctx.lineTo(b.x, cy); // Left
+                    ctx.moveTo(cx, b.y); 
+                    ctx.lineTo(b.x + b.width, cy); 
+                    ctx.lineTo(cx, b.y + b.height); 
+                    ctx.lineTo(b.x, cy); 
                     ctx.closePath();
                     ctx.fill();
                 } else if (b.shape === 's_sun') {
-                    // Отрисовка звезды
                     drawStar(ctx, b.x + b.width/2, b.y + b.height/2, 5, b.width/2, b.width/4);
                 } else if (b.shape === 's_cookie' || b.shape === 's_puffy') {
-                    // Отрисовка сквиркла/печенья
                     drawRoundedRect(ctx, b.x, b.y, b.width, b.height, b.width * 0.4); 
                 } else { 
                     ctx.fillRect(b.x, b.y, b.width, b.height); 
                 }
             }
             
-            // --- ГЛАВНОЕ ИЗМЕНЕНИЕ: ИСПОЛЬЗУЕМ currentSkinColor ДЛЯ ОТРИСОВКИ ПЛЕЕРА ---
             if (player.invulnerable % 10 < 5) { ctx.fillStyle = currentSkinColor; ctx.fillRect(player.x, player.y, player.width, player.height); }
 
             if (!player.grounded && player.jumpsLeft > 0) {
                 const bx = player.x + 10; const by = player.y - 15;
                 ctx.fillStyle = 'rgba(255,0,0,0.5)'; ctx.fillRect(bx, by, 30, 5);
-                if(player.jumpsLeft === 1) { ctx.fillStyle = '#00FF00'; ctx.fillRect(bx, by, 15, 5); }
+                // Отрисовка второго прыжка
+                if(player.jumpsLeft === 2) { 
+                    ctx.fillStyle = '#4CAF50'; ctx.fillRect(bx + 15, by, 15, 5);
+                    ctx.fillStyle = '#00FF00'; ctx.fillRect(bx, by, 15, 5); 
+                }
+                // Отрисовка первого прыжка
+                else if(player.jumpsLeft === 1) { 
+                    ctx.fillStyle = '#00FF00'; ctx.fillRect(bx, by, 15, 5); 
+                }
             }
 
             ctx.restore();
             ctx.fillStyle = 'rgba(255,255,255,0.7)'; ctx.font = 'bold 16px monospace';
-            ctx.fillText('V5.3+', canvas.width - 60, 20); // Немного меняем версию для отличия
+            ctx.fillText('V5.3.1', canvas.width - 70, 20); 
         }
 
         function loop() {
@@ -1038,6 +1138,15 @@
         }
         
         window.onload = function() { 
+            // Инициализация игрока с 2 прыжками
+            player.maxJumps = 2; 
+            
+            // Проверка и корректировка старых записей рекордов, если они были только в highScore
+            if (!stats.records.normal && highScore) {
+                 stats.records.normal = parseInt(highScore);
+                 saveStats();
+            }
+
             setLanguage(currentLang);
             showMenu(); 
         };
