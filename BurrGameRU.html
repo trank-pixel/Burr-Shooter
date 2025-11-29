@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title data-translate="title">Burr Game V5.3</title>
+    <title data-translate="title">Burr Game V5.3 </title>
     <style>
         /* --- Base & Body --- */
         body {
@@ -181,6 +181,8 @@
         }
 
         /* V5.2: Color Picker Style */
+        /* Объединенные стили для пикеров скина и пули */
+        .color-picker-card #customSkinColorPicker, 
         #customColorPicker {
             -webkit-appearance: none;
             -moz-appearance: none;
@@ -196,10 +198,14 @@
             box-shadow: inset 0 0 0 4px #2c2e30; 
         }
 
-        #customColorPicker::-webkit-color-swatch-wrapper { padding: 0; }
-        #customColorPicker::-webkit-color-swatch { border: none; }
-        #customColorPicker::-moz-color-swatch-wrapper { padding: 0; }
-        #customColorPicker::-moz-color-swatch { border: none; }
+        #customColorPicker::-webkit-color-swatch-wrapper, 
+        #customSkinColorPicker::-webkit-color-swatch-wrapper { padding: 0; }
+        #customColorPicker::-webkit-color-swatch, 
+        #customSkinColorPicker::-webkit-color-swatch { border: none; }
+        #customColorPicker::-moz-color-swatch-wrapper,
+        #customSkinColorPicker::-moz-color-swatch-wrapper { padding: 0; }
+        #customColorPicker::-moz-color-swatch,
+        #customSkinColorPicker::-moz-color-swatch { border: none; }
 
 
         /* Controls */
@@ -322,7 +328,12 @@
     <div id="wardrobeScreen" class="game-screen" style="display:none;">
         <div class="menu-container">
             <h2 data-translate="skins"></h2>
-            <div id="skinContainer" class="grid-container"></div>
+            <h3 data-translate="color_title"></h3> <div id="skinColorContainer" class="grid-container">
+                 <div class="option-card color-picker-card" style="border-radius: 20px;">
+                    <input type="color" id="customSkinColorPicker" value="#FF0000" onchange="setCustomSkinColor(this.value)">
+                </div>
+            </div>
+            <h3 data-translate="presets_title"></h3> <div id="skinContainer" class="grid-container"></div>
             <button class="menu-button btn-danger" onclick="showMenu()" data-translate="back"></button>
         </div>
     </div>
@@ -370,10 +381,10 @@
         // --- 1. ЛОКАЛИЗАЦИЯ (V5.3 UPDATE) ---
         const translations = {
             ru: {
-                title: 'BURR GAME V5.3', version_note: '(M3 Style + Fixed Shapes)', mode_title: 'Режим игры:',
+                title: 'BURR GAME V5.3', version_note: '(M3 Style + Colors Update)', mode_title: 'Режим игры:',
                 mode_normal: 'START Обычный (V5.0.2)', mode_hardened: 'HARDENED Усложнённый (HP x5)',
                 mode_hardcore: 'HARDCORE Хардкор (1 HP)', mode_auto: 'AUTO Автопилот', 
-                skins: 'Скины', skins_btn: 'SKINS Скины',
+                skins: 'Скины', skins_btn: 'SKINS Скины', presets_title: 'Пресеты цвета:',
                 bullets: 'Пули', bullets_btn: 'BULLETS Пули',
                 record: 'Рекорд:', back: 'НАЗАД', color_title: 'Цвет:', shape_title: 'Форма:',
                 stop_auto: 'СТОП АВТО', player_chat_1: 'Игрок: "Даже не вспотел!"', pusheen_chat_1: 'Pusheen: "я вижу тебя. А ты меня?"',
@@ -382,10 +393,10 @@
                 current_score: 'СЧЕТ:', current_high_score: 'РЕКОРД:', current_mode: 'РЕЖИМ:',
             },
             en: {
-                title: 'BURR GAME V5.3', version_note: '(M3 Style + Fixed Shapes)', mode_title: 'Game Mode:',
+                title: 'BURR GAME V5.3', version_note: '(M3 Style + Colors Update)', mode_title: 'Game Mode:',
                 mode_normal: 'START Normal (V5.0.2)', mode_hardened: 'HARDENED Hardened (HP x5)',
                 mode_hardcore: 'HARDCORE Hardcore (1 HP)', mode_auto: 'AUTO Autopilot', 
-                skins: 'Skins', skins_btn: 'SKINS Skins',
+                skins: 'Skins', skins_btn: 'SKINS Skins', presets_title: 'Color Presets:',
                 bullets: 'Bullets', bullets_btn: 'BULLETS Bullets',
                 record: 'High Score:', back: 'BACK', color_title: 'Color:', shape_title: 'Shape:',
                 stop_auto: 'STOP AUTO', player_chat_1: 'Player: "Didn\'t even break a sweat!"', pusheen_chat_1: 'Pusheen: "I see you. Do you see me?"',
@@ -446,28 +457,26 @@
         const heartContainer = document.getElementById('heartContainer');
 
 
-        const availableSkins = [
-            { id: 'cube_red', color: '#FF0000' }, { id: 'cube_grey', color: '#808080' }, 
-            { id: 'cube_pink', color: '#FFC0CB' }, { id: 'cube_beige', color: '#F5F5DC' }, 
-            { id: 'cube_white', color: '#FFFFFF' }, { id: 'cube_brown', color: '#A52A2A' },
-            { id: 'cube_gold', color: '#FFD700' }, { id: 'cube_purple', color: '#800080' },  
-            { id: 'cube_teal', color: '#008080' }      
+        // --- ОБНОВЛЕННЫЕ ПРЕСЕТЫ СКИНОВ ---
+        const availableSkinPresets = [
+            { id: 'cube_red', color: '#FF0000' }, 
+            { id: 'cube_grey', color: '#808080' }, 
+            { id: 'cube_teal', color: '#008080' }, 
+            { id: 'cube_gold', color: '#FFD700' },
+            { id: 'cube_white', color: '#FFFFFF' }
         ];
-
-        const defaultBulletColor = '#FFFF00'; 
 
         const availableBulletShapes = [
             { id: 's_rect', name: '■' }, { id: 's_circle', name: '●' }, { id: 's_tri', name: '▲' },
             { id: 's_puffy', name: '' }, { id: 's_diamond', name: '' }, { id: 's_sun', name: '' }, { id: 's_cookie', name: '' }
         ];
 
-        let currentSkinId = localStorage.getItem('skinId') || 'cube_red';
+        // Изначальный ID скина теперь не важен, важен только цвет
         let currentSkinColor = localStorage.getItem('skinColor') || '#FF0000';
-        let currentBulletColor = localStorage.getItem('bulColor') || defaultBulletColor;
+        let currentBulletColor = localStorage.getItem('bulColor') || '#FFFF00';
         let currentBulletShape = localStorage.getItem('bulShape') || 's_rect';
 
         const assets = { ground: new Image(), bullet: new Image(), spike: new Image() };
-        // assets.ground.src = '67.png'; assets.bullet.src = '69.png'; assets.spike.src = '65.png'; 
 
         function resize() {
             canvas.width = window.innerWidth;
@@ -555,22 +564,51 @@
             document.getElementById('customColorPicker').value = currentBulletColor;
             renderBulletSettings(); 
         }
+        
+        // --- НОВАЯ ФУНКЦИЯ ДЛЯ УСТАНОВКИ ПОЛЬЗОВАТЕЛЬСКОГО ЦВЕТА СКИНА ---
+        function setCustomSkinColor(color) {
+            currentSkinColor = color; 
+            localStorage.setItem('skinColor', color);
+            renderSkins(color); // Перерисовываем для обновления выбора
+        }
 
-        function renderSkins() {
+
+        function renderSkins(selectedColor = currentSkinColor) {
+            const cColor = document.getElementById('skinColorContainer');
+            const pickerCard = cColor.querySelector('.option-card');
+            const picker = document.getElementById('customSkinColorPicker');
+            
+            // 1. Устанавливаем текущий цвет и выделяем пикер
+            picker.value = selectedColor; 
+            pickerCard.classList.add('selected'); // Выделяем пикер по умолчанию
+
             const c = document.getElementById('skinContainer'); c.innerHTML = '';
-            availableSkins.forEach(s => {
+            
+            // 2. Рендерим пресеты
+            availableSkinPresets.forEach(s => {
                 const d = document.createElement('div'); d.className = 'option-card';
-                if(currentSkinId === s.id) d.classList.add('selected');
+                // Проверяем, совпадает ли текущий цвет с пресетом (для выделения)
+                if(selectedColor.toUpperCase() === s.color.toUpperCase()) {
+                    d.classList.add('selected');
+                    pickerCard.classList.remove('selected'); // Если выбран пресет, снимаем выделение с пикера
+                }
                 d.innerHTML = `<div class="color-preview" style="background:${s.color}"></div>`;
                 d.onclick = () => { 
-                    currentSkinId = s.id; currentSkinColor = s.color;
-                    localStorage.setItem('skinId', s.id); localStorage.setItem('skinColor', s.color);
-                    renderSkins();
+                    setCustomSkinColor(s.color); // Устанавливаем цвет из пресета
                 };
                 c.appendChild(d);
             });
+            
+            // Если выбранный цвет не совпал ни с одним пресетом, выделяем пикер
+            let isPresetSelected = availableSkinPresets.some(s => s.color.toUpperCase() === selectedColor.toUpperCase());
+            if (!isPresetSelected) {
+                pickerCard.classList.add('selected');
+            } else {
+                pickerCard.classList.remove('selected');
+            }
         }
-        
+
+
         function setCustomBulletColor(color) {
             currentBulletColor = color; 
             localStorage.setItem('bulColor', color);
@@ -596,7 +634,7 @@
                 preview.className = `shape-preview shape-${s.id}`;
                 preview.textContent = s.name;
                 
-                if (s.id !== 's_tri') { // Для треугольника используется бордер
+                if (s.id !== 's_tri') { 
                     preview.style.backgroundColor = '#fff'; 
                 }
 
@@ -640,7 +678,7 @@
             loop();
         }
 
-        // --- ИГРОВАЯ ЛОГИКА ---
+        // --- ИГРОВАЯ ЛОГИКА (ОСТАЛЬНЫЕ ФУНКЦИИ БЕЗ ИЗМЕНЕНИЙ) ---
 
         function disableAutopilotManual() {
             if(gameMode.autoState === 'active') {
@@ -894,22 +932,20 @@
 
         // Вспомогательная функция для отрисовки "мягкого" прямоугольника (Squircle/Cookie)
         function drawRoundedRect(ctx, x, y, w, h, radius) {
-            let r = radius; // Общий радиус
-            // Для "печенья" и сквиркла нужно скругление, но без использования стандартного arc
-            // Здесь мы используем простую версию с малым радиусом, чтобы имитировать "мягкость"
+            let r = radius; 
             if (r > w / 2) r = w / 2;
             if (r > h / 2) r = h / 2;
 
             ctx.beginPath();
             ctx.moveTo(x + r, y);
             ctx.lineTo(x + w - r, y);
-            ctx.quadraticCurveTo(x + w, y, x + w, y + r); // Top right
+            ctx.quadraticCurveTo(x + w, y, x + w, y + r); 
             ctx.lineTo(x + w, y + h - r);
-            ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h); // Bottom right
+            ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h); 
             ctx.lineTo(x + r, y + h);
-            ctx.quadraticCurveTo(x, y + h, x, y + h - r); // Bottom left
+            ctx.quadraticCurveTo(x, y + h, x, y + h - r); 
             ctx.lineTo(x, y + r);
-            ctx.quadraticCurveTo(x, y, x + r, y); // Top left
+            ctx.quadraticCurveTo(x, y, x + r, y); 
             ctx.closePath();
             ctx.fill();
         }
@@ -981,7 +1017,8 @@
                     ctx.fillRect(b.x, b.y, b.width, b.height); 
                 }
             }
-
+            
+            // --- ГЛАВНОЕ ИЗМЕНЕНИЕ: ИСПОЛЬЗУЕМ currentSkinColor ДЛЯ ОТРИСОВКИ ПЛЕЕРА ---
             if (player.invulnerable % 10 < 5) { ctx.fillStyle = currentSkinColor; ctx.fillRect(player.x, player.y, player.width, player.height); }
 
             if (!player.grounded && player.jumpsLeft > 0) {
@@ -992,7 +1029,7 @@
 
             ctx.restore();
             ctx.fillStyle = 'rgba(255,255,255,0.7)'; ctx.font = 'bold 16px monospace';
-            ctx.fillText('V5.3', canvas.width - 60, 20);
+            ctx.fillText('V5.3+', canvas.width - 60, 20); // Немного меняем версию для отличия
         }
 
         function loop() {
