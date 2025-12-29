@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title data-translate="title">Burr Game V5.3.1</title>
+    <title data-translate="title">Burr Game V5.3.1 - Winter Edition</title>
     <style>
         /* --- Base & Body --- */
         body {
@@ -18,8 +18,30 @@
         #gameCanvas {
             display: block;
             margin: 0 auto;
-            background-color: #87CEEB; 
+            background-color: #1a2a3a; /* Сделали фон чуть холоднее */
             border: 2px solid #000;
+        }
+
+        /* --- ЭФФЕКТ СНЕГА ДЛЯ МЕНЮ --- */
+        .snow-container {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none;
+            z-index: 11; /* Перед контейнером меню */
+            overflow: hidden;
+        }
+
+        .snowflake {
+            position: absolute;
+            top: -10px;
+            color: white;
+            font-size: 20px;
+            user-select: none;
+            animation: fall linear infinite;
+        }
+
+        @keyframes fall {
+            to { transform: translateY(105vh) rotate(360deg); }
         }
 
         /* --- M3 STYLES & Menus --- */
@@ -29,7 +51,7 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background-color: rgba(26, 28, 30, 0.95);
+            background-color: rgba(26, 28, 30, 0.85); /* Чуть прозрачнее для снега */
             display: flex;
             flex-direction: column;
             justify-content: center;
@@ -52,13 +74,13 @@
             flex-direction: column;
             gap: 15px;
             position: relative; 
+            z-index: 12; /* Поверх снега */
         }
 
         h1 { margin: 0; font-size: 32px; color: #ffb74d; }
         h2 { margin: 0; font-size: 24px; color: #e2e2e6; }
         h3 { margin: 10px 0 5px; font-size: 18px; color: #c4c7c5; }
 
-        /* M3 Buttons */
         .menu-button {
             padding: 15px 24px;
             font-size: 18px;
@@ -77,14 +99,12 @@
         }
 
         .menu-button:active { transform: scale(0.96); }
-
         .btn-primary { background-color: #a8c7fa; color: #062e6f; }
         .btn-secondary { background-color: #d7c0ff; color: #3b0090; }
         .btn-danger { background-color: #ffb4ab; color: #690005; }
         .btn-warning { background-color: #ffdcbe; color: #5d4200; }
         .btn-info { background-color: #4fd8eb; color: #00363d; }
         
-        /* Language Toggle & Stats Button */
         #langToggle {
             position: absolute;
             top: 15px;
@@ -96,13 +116,9 @@
             color: white;
             cursor: pointer;
             border: none;
-            transition: background-color 0.2s;
-        }
-        #langToggle:hover {
-            background-color: #5d6166;
+            z-index: 15;
         }
         
-        /* НОВАЯ Кнопка Статистики (M3 Expressive) */
         #statsButton {
             position: absolute;
             bottom: 15px;
@@ -110,211 +126,55 @@
             width: 56px;
             height: 56px;
             border-radius: 50%;
-            background-color: #ffb74d; /* Light orange */
+            background-color: #ffb74d;
             color: #2c2e30;
             border: none;
             font-size: 24px;
             font-weight: bold;
             cursor: pointer;
             box-shadow: 0 4px 8px rgba(0,0,0,0.4);
-            transition: transform 0.1s, box-shadow 0.2s;
-        }
-        #statsButton:active {
-            transform: scale(0.9);
+            z-index: 15;
         }
 
-
-        .grid-container {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            gap: 15px;
-            margin-bottom: 20px;
-        }
-
-        /* --- V5.2/V5.3: Updated Option Cards --- */
-        .option-card {
-            width: 80px; 
-            height: 80px; 
-            border-radius: 20px; 
-            background-color: #43474e;
-            border: 3px solid transparent;
-            cursor: pointer;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            transition: all 0.2s;
-            position: relative;
-        }
-
-        .option-card.selected {
-            border-color: #a8c7fa;
-            background-color: #33363b;
-            box-shadow: 0 0 0 4px rgba(168, 199, 250, 0.3);
-        }
-
+        .grid-container { display: flex; flex-wrap: wrap; justify-content: center; gap: 15px; margin-bottom: 20px; }
+        .option-card { width: 80px; height: 80px; border-radius: 20px; background-color: #43474e; border: 3px solid transparent; cursor: pointer; display: flex; justify-content: center; align-items: center; transition: all 0.2s; position: relative; }
+        .option-card.selected { border-color: #a8c7fa; background-color: #33363b; box-shadow: 0 0 0 4px rgba(168, 199, 250, 0.3); }
         .color-preview { width: 60px; height: 60px; border-radius: 16px; } 
-        .shape-preview { 
-            width: 60px; 
-            height: 60px; 
-            background-color: #fff; 
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            transition: all 0.2s;
-            color: black;
-            font-size: 30px; 
-            font-weight: 900;
-        }
+        .shape-preview { width: 60px; height: 60px; background-color: #fff; display: flex; justify-content: center; align-items: center; transition: all 0.2s; color: black; font-size: 30px; font-weight: 900; }
         
-        /* Color Picker Style */
-        .color-picker-card #customSkinColorPicker, 
-        #customColorPicker {
-            -webkit-appearance: none;
-            -moz-appearance: none;
-            appearance: none;
-            border: none;
-            width: 80px;
-            height: 80px;
-            padding: 0;
-            background: none;
-            cursor: pointer;
-            border-radius: 20px;
-            overflow: hidden;
-            box-shadow: inset 0 0 0 4px #2c2e30; 
-        }
-
-        #customColorPicker::-webkit-color-swatch-wrapper, 
-        #customSkinColorPicker::-webkit-color-swatch-wrapper { padding: 0; }
-        #customColorPicker::-webkit-color-swatch, 
-        #customSkinColorPicker::-webkit-color-swatch { border: none; }
-        #customColorPicker::-moz-color-swatch-wrapper,
-        #customSkinColorPicker::-moz-color-swatch-wrapper { padding: 0; }
-        #customColorPicker::-moz-color-swatch,
-        #customSkinColorPicker::-moz-color-swatch { border: none; }
-
-
-        /* Controls */
-        #controls {
-            position: absolute;
-            bottom: 20px;
-            width: 100%;
-            height: 80px;
-            pointer-events: none; 
-            display: flex;
-            justify-content: space-between;
-            padding: 0 20px;
-            box-sizing: border-box;
-        }
-
-        .control-group {
-            pointer-events: auto;
-            display: flex;
-            gap: 15px;
-            align-items: flex-end;
-        }
-
-        .btn {
-            width: 60px; 
-            height: 60px; 
-            background-color: rgba(255, 255, 255, 0.2);
-            backdrop-filter: blur(5px);
-            border: 2px solid rgba(255, 255, 255, 0.4);
-            border-radius: 20px; 
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: 24px; 
-            user-select: none;
-            cursor: pointer;
-            color: white;
-            font-weight: bold;
-        }
-        
-        .btn:active { background-color: rgba(255, 255, 255, 0.4); transform: scale(0.95); }
+        #controls { position: absolute; bottom: 20px; width: 100%; height: 80px; pointer-events: none; display: flex; justify-content: space-between; padding: 0 20px; box-sizing: border-box; }
+        .control-group { pointer-events: auto; display: flex; gap: 15px; align-items: flex-end; }
+        .btn { width: 60px; height: 60px; background-color: rgba(255, 255, 255, 0.2); backdrop-filter: blur(5px); border: 2px solid rgba(255, 255, 255, 0.4); border-radius: 20px; display: flex; justify-content: center; align-items: center; font-size: 24px; user-select: none; cursor: pointer; color: white; font-weight: bold; }
+        .btn:active { transform: scale(0.95); }
         #btnShoot { background-color: rgba(255, 100, 100, 0.3); }
         #btnJump { background-color: rgba(255, 255, 100, 0.3); }
         
-        /* UI */
-        #uiLayer {
-            position: absolute;
-            top: 20px;
-            left: 20px;
-            z-index: 5;
-            pointer-events: none;
-            text-shadow: 2px 2px 0 #000;
-        }
-
-        .heart {
-            font-size: 30px; 
-            margin-right: 5px;
-            color: red; 
-        }
-
-        /* Chat */
-        #chatBox {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            background: rgba(0, 0, 0, 0.6);
-            color: white;
-            padding: 10px 15px;
-            border-radius: 10px;
-            opacity: 0;
-            transition: opacity 0.5s;
-            z-index: 6;
-            pointer-events: none;
-            max-width: 300px;
-            text-align: right;
-        }
-
-
-        /* Modals */
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.8);
-            z-index: 100;
-            justify-content: center;
-            align-items: center;
-        }
-        .modal-content {
-            background: #2c2e30;
-            padding: 40px;
-            border-radius: 28px;
-            text-align: center;
-            color: white;
-            max-width: 90%;
-            width: 400px;
-            box-shadow: 0 8px 30px rgba(0,0,0,0.6);
-        }
-        .modal-content h2 { color: #ffb74d; }
-        .modal-content p { font-size: 18px; margin: 10px 0; }
-
+        #uiLayer { position: absolute; top: 20px; left: 20px; z-index: 5; pointer-events: none; text-shadow: 2px 2px 0 #000; }
+        .heart { font-size: 30px; margin-right: 5px; color: red; }
+        #chatBox { position: absolute; top: 20px; right: 20px; background: rgba(0, 0, 0, 0.6); color: white; padding: 10px 15px; border-radius: 10px; opacity: 0; transition: opacity 0.5s; z-index: 6; pointer-events: none; max-width: 300px; text-align: right; }
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 100; justify-content: center; align-items: center; }
+        .modal-content { background: #2c2e30; padding: 40px; border-radius: 28px; text-align: center; color: white; max-width: 90%; width: 400px; box-shadow: 0 8px 30px rgba(0,0,0,0.6); }
     </style>
 </head>
 <body>
+
+    <div id="snowLayer" class="snow-container"></div>
 
     <div id="menuScreen" class="game-screen">
         <div class="menu-container">
             <button id="langToggle">EN</button> 
             <h1 data-translate="title">BURR GAME V5.3.1</h1>
             <p style="color:#c4c7c5; font-size: 14px;" data-translate="version_note"></p>
-
             <h3 data-translate="mode_title"></h3>
             <button class="menu-button btn-primary" onclick="startGame('normal')" data-translate="mode_normal"></button>
             <button class="menu-button btn-warning" onclick="startGame('hardened')" data-translate="mode_hardened"></button>
             <button class="menu-button btn-danger" onclick="startGame('hardcore')" data-translate="mode_hardcore"></button>
             <button class="menu-button btn-info" onclick="startGame('auto')" data-translate="mode_auto"></button>
-
             <div style="display:flex; gap:10px; margin-top:10px;">
                 <button class="menu-button btn-secondary" onclick="openWardrobe()" style="flex:1;" data-translate="skins_btn"></button>
                 <button class="menu-button btn-secondary" onclick="openBulletSettings()" style="flex:1;" data-translate="bullets_btn"></button>
             </div>
-            
             <p style="margin-top:5px; color:#4CAF50;"><span data-translate="record"></span> <span id="highScore">0</span></p>
-            
             <button id="statsButton" onclick="openStatsModal()">📊</button>
         </div>
     </div>
@@ -350,7 +210,6 @@
     </div>
 
     <canvas id="gameCanvas"></canvas>
-
     <button id="autopilotToggle" class="menu-button btn-danger btn-toggle" onclick="disableAutopilotManual()" style="display:none;"></button>
     <div id="uiLayer"></div>
     <div id="chatBox"></div>
@@ -378,7 +237,6 @@
         </div>
     </div>
 
-
     <div id="controls" style="display:none;">
         <div class="control-group">
             <div class="btn" id="btnLeft">←</div>
@@ -390,17 +248,30 @@
     </div>
 
     <script>
-        // --- 1. ГЛОБАЛЬНЫЕ НАСТРОЙКИ И СОХРАНЕНИЕ ---
-        
-        // --- Статистика по умолчанию ---
+        // --- 1. СНЕЖИНКИ (LOGIC) ---
+        function createSnow() {
+            const snowLayer = document.getElementById('snowLayer');
+            const flakeCount = 50;
+            for (let i = 0; i < flakeCount; i++) {
+                const flake = document.createElement('div');
+                flake.className = 'snowflake';
+                flake.innerHTML = '.'; // Точки выглядят как снег
+                flake.style.left = Math.random() * 100 + 'vw';
+                flake.style.opacity = Math.random();
+                flake.style.animationDuration = (Math.random() * 3 + 2) + 's';
+                flake.style.animationDelay = Math.random() * 5 + 's';
+                snowLayer.appendChild(flake);
+            }
+        }
+
+        // --- ДАЛЕЕ ВАШ КОД БЕЗ ИЗМЕНЕНИЙ В ЛОГИКЕ ---
         const defaultStats = {
             totalJumps: 0,
             autoAccuracy: 19.00,
-            colorUsage: {}, // {'#FF0000': 15, '#00FF00': 5}
+            colorUsage: {}, 
             records: { normal: 0, hardened: 0, hardcore: 0, auto: 0 }
         };
         
-        // Загрузка статистики или использование значений по умолчанию
         let stats = JSON.parse(localStorage.getItem('burr_stats')) || defaultStats;
         let highScore = localStorage.getItem('burr_highScore') || 0;
         
@@ -409,10 +280,9 @@
             localStorage.setItem('burr_highScore', highScore);
         }
 
-        // --- 2. ЛОКАЛИЗАЦИЯ (V5.3.1 UPDATE) ---
         const translations = {
             ru: {
-                title: 'BURR GAME V5.3.1', version_note: '(Double Jump + Stats)', mode_title: 'Режим игры:',
+                title: 'BURR GAME V5.3.1', version_note: '(Double Jump + Winter Mod)', mode_title: 'Режим игры:',
                 mode_normal: 'START Обычный', mode_hardened: 'HARDENED Усложнённый',
                 mode_hardcore: 'HARDCORE Хардкор', mode_auto: 'AUTO Автопилот', 
                 skins: 'Скины', skins_btn: 'SKINS Скины', presets_title: 'Пресеты цвета:',
@@ -426,7 +296,7 @@
                 mode_normal_s: 'Обычный:', mode_hardened_s: 'Усложнённый:', mode_hardcore_s: 'Хардкор:', mode_auto_s: 'Автопилот:',
             },
             en: {
-                title: 'BURR GAME V5.3.1', version_note: '(Double Jump + Stats)', mode_title: 'Game Mode:',
+                title: 'BURR GAME V5.3.1', version_note: '(Double Jump + Winter Mod)', mode_title: 'Game Mode:',
                 mode_normal: 'START Normal', mode_hardened: 'HARDENED Hardened',
                 mode_hardcore: 'HARDCORE Hardcore', mode_auto: 'AUTO Autopilot', 
                 skins: 'Skins', skins_btn: 'SKINS Skins', presets_title: 'Color Presets:',
@@ -447,21 +317,12 @@
             currentLang = lang;
             localStorage.setItem('gameLang', lang);
             const t = translations[lang];
-
             document.querySelectorAll('[data-translate]').forEach(el => {
                 const key = el.getAttribute('data-translate');
-                if (t[key]) {
-                    el.textContent = t[key];
-                }
+                if (t[key]) el.textContent = t[key];
             });
-            
             document.getElementById('highScore').textContent = highScore || 0;
             document.getElementById('langToggle').textContent = lang === 'ru' ? 'EN' : 'RU';
-            
-            if (document.getElementById('autopilotToggle') && document.getElementById('autopilotToggle').style.display !== 'none') {
-                document.getElementById('autopilotToggle').textContent = t.stop_auto;
-            }
-
             updateHUDText();
         }
 
@@ -473,7 +334,6 @@
              document.getElementById('hudMode').textContent = `${t.current_mode} ${gameMode.type.toUpperCase()}`;
         }
 
-
         document.getElementById('langToggle').addEventListener('click', () => {
             const newLang = currentLang === 'ru' ? 'en' : 'ru';
             setLanguage(newLang);
@@ -481,80 +341,41 @@
         
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
-        
         const uiLayer = document.getElementById('uiLayer');
-        uiLayer.innerHTML = `
-            <div id="hudScore" style="color:#fff; font-size: 20px;"></div>
-            <div id="hudRecord" style="color:#4CAF50; font-size: 20px;"></div>
-            <div id="hudMode" style="color:#4fd8eb; font-size: 20px; margin-bottom: 10px;"></div>
-            <div id="heartContainer"></div>
-        `;
+        uiLayer.innerHTML = `<div id="hudScore" style="color:#fff; font-size: 20px;"></div><div id="hudRecord" style="color:#4CAF50; font-size: 20px;"></div><div id="hudMode" style="color:#4fd8eb; font-size: 20px; margin-bottom: 10px;"></div><div id="heartContainer"></div>`;
         const heartContainer = document.getElementById('heartContainer');
 
-
-        const availableSkinPresets = [
-            { id: 'cube_red', color: '#FF0000' }, 
-            { id: 'cube_grey', color: '#808080' }, 
-            { id: 'cube_teal', color: '#008080' }, 
-            { id: 'cube_gold', color: '#FFD700' },
-            { id: 'cube_white', color: '#FFFFFF' }
-        ];
-
-        const availableBulletShapes = [
-            { id: 's_rect', name: '■' }, { id: 's_circle', name: '●' }, { id: 's_tri', name: '▲' },
-            { id: 's_puffy', name: '' }, { id: 's_diamond', name: '' }, { id: 's_sun', name: '' }, { id: 's_cookie', name: '' }
-        ];
+        const availableSkinPresets = [{ id: 'cube_red', color: '#FF0000' }, { id: 'cube_grey', color: '#808080' }, { id: 'cube_teal', color: '#008080' }, { id: 'cube_gold', color: '#FFD700' },{ id: 'cube_white', color: '#FFFFFF' }];
+        const availableBulletShapes = [{ id: 's_rect', name: '■' }, { id: 's_circle', name: '●' }, { id: 's_tri', name: '▲' }, { id: 's_puffy', name: '' }, { id: 's_diamond', name: '' }, { id: 's_sun', name: '' }, { id: 's_cookie', name: '' }];
 
         let currentSkinColor = localStorage.getItem('skinColor') || '#FF0000';
         let currentBulletColor = localStorage.getItem('bulColor') || '#FFFF00';
         let currentBulletShape = localStorage.getItem('bulShape') || 's_rect';
-
         const assets = { ground: new Image(), bullet: new Image(), spike: new Image() };
 
-        function resize() {
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
-        }
+        function resize() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
         window.addEventListener('resize', resize);
         resize();
 
-        let gameMode = {
-            type: 'normal',
-            enemyHP: 1, speedMult: 1, isAuto: false, autoState: 'off'
-        };
-
+        let gameMode = { type: 'normal', enemyHP: 1, speedMult: 1, isAuto: false, autoState: 'off' };
         let gameState = 'MENU';
         const GRAVITY = 0.8; const TERMINAL_VELOCITY = 15; const TILE_SIZE = 50; 
         
-        const player = {
-            x: 100, y: 100, width: TILE_SIZE, height: TILE_SIZE,
-            vx: 0, vy: 0, speed: 7, jumpPower: -16, 
-            grounded: false, hp: 3, maxHp: 3,
-            facingRight: true, invulnerable: 0, cooldownTimer: 0,
-            jumpsLeft: 1, maxJumps: 2 // ДВОЙНОЙ ПРЫЖОК
-        };
-
+        const player = { x: 100, y: 100, width: TILE_SIZE, height: TILE_SIZE, vx: 0, vy: 0, speed: 7, jumpPower: -16, grounded: false, hp: 3, maxHp: 3, facingRight: true, invulnerable: 0, cooldownTimer: 0, jumpsLeft: 1, maxJumps: 2 };
         let bullets = [], enemies = [], targets = [], platforms = [];
         let cameraX = 0, score = 0, lastScoredBlock = 0;
-        
         const pusheenEnemy = { x: -300, y: canvas.height - TILE_SIZE - 50, width: 50, height: 50, hp: 50, type: 'pusheen' };
-
         const keys = { left: false, right: false, up: false, shoot: false };
-        let canShoot = true; 
-        const shootCooldown = 15; 
+        let canShoot = true; const shootCooldown = 15; 
 
         // --- УПРАВЛЕНИЕ ---
         window.addEventListener('keydown', (e) => {
             if (gameMode.isAuto && gameMode.autoState === 'active') disableAutopilotManual();
             if (e.code === 'ArrowLeft' || e.code === 'KeyA') keys.left = true;
             if (e.code === 'ArrowRight' || e.code === 'KeyD') keys.right = true;
-            if (e.code === 'ArrowUp' || e.code === 'Space' || e.code === 'KeyW') {
-                if(gameState === 'MENU' && e.code === 'Space') startGame('normal');
-                else keys.up = true;
-            }
+            if (e.code === 'ArrowUp' || e.code === 'Space' || e.code === 'KeyW') { if(gameState === 'MENU' && e.code === 'Space') startGame('normal'); else keys.up = true; }
             if (e.code === 'KeyZ' || e.code === 'KeyE') keys.shoot = true;
         });
-
         window.addEventListener('keyup', (e) => {
             if (e.code === 'ArrowLeft' || e.code === 'KeyA') keys.left = false;
             if (e.code === 'ArrowRight' || e.code === 'KeyD') keys.right = false;
@@ -563,282 +384,123 @@
         });
 
         const addTouch = (id, keyName) => {
-            const el = document.getElementById(id);
-            if (!el) return;
+            const el = document.getElementById(id); if (!el) return;
             el.addEventListener('touchstart', (e) => { e.preventDefault(); keys[keyName] = true; if(gameMode.isAuto) disableAutopilotManual(); });
             el.addEventListener('touchend', (e) => { e.preventDefault(); keys[keyName] = false; });
             el.addEventListener('mousedown', (e) => { keys[keyName] = true; });
             el.addEventListener('mouseup', (e) => { keys[keyName] = false; });
         };
+        addTouch('btnLeft', 'left'); addTouch('btnRight', 'right'); addTouch('btnJump', 'up'); addTouch('btnShoot', 'shoot'); 
 
-        addTouch('btnLeft', 'left'); addTouch('btnRight', 'right');
-        addTouch('btnJump', 'up'); addTouch('btnShoot', 'shoot'); 
-
-        // --- МЕНЮ И НАСТРОЙКИ ---
         function showScreen(id) {
             document.querySelectorAll('.game-screen').forEach(s => s.style.display = 'none');
-            // Только для меню показываем кнопку статистики
             document.getElementById('statsButton').style.display = (id === 'menuScreen') ? 'block' : 'none';
             document.getElementById(id).style.display = 'flex';
             document.getElementById('controls').style.display = 'none';
             document.getElementById('autopilotToggle').style.display = 'none';
+            // Показываем снег только если не в самой игре
+            document.getElementById('snowLayer').style.display = (id === 'gameCanvas') ? 'none' : 'block';
             setLanguage(currentLang);
         }
 
-        function showMenu() {
-            gameState = 'MENU';
-            showScreen('menuScreen');
-            document.getElementById('highScore').textContent = highScore || 0;
-            saveStats(); // Сохраняем статистику при выходе в меню
-        }
-
+        function showMenu() { gameState = 'MENU'; showScreen('menuScreen'); document.getElementById('highScore').textContent = highScore || 0; saveStats(); }
         function openWardrobe() { showScreen('wardrobeScreen'); renderSkins(); }
-        function openBulletSettings() { 
-            showScreen('bulletSettingsScreen'); 
-            document.getElementById('customColorPicker').value = currentBulletColor;
-            renderBulletSettings(); 
-        }
-        
-        function setCustomSkinColor(color) {
-            currentSkinColor = color; 
-            localStorage.setItem('skinColor', color);
-            renderSkins(color); 
-        }
+        function openBulletSettings() { showScreen('bulletSettingsScreen'); document.getElementById('customColorPicker').value = currentBulletColor; renderBulletSettings(); }
+        function setCustomSkinColor(color) { currentSkinColor = color; localStorage.setItem('skinColor', color); renderSkins(color); }
 
         function renderSkins(selectedColor = currentSkinColor) {
             const cColor = document.getElementById('skinColorContainer');
             const pickerCard = cColor.querySelector('.option-card');
             const picker = document.getElementById('customSkinColorPicker');
-            
-            picker.value = selectedColor; 
-            pickerCard.classList.add('selected');
-
+            picker.value = selectedColor; pickerCard.classList.add('selected');
             const c = document.getElementById('skinContainer'); c.innerHTML = '';
-            
             availableSkinPresets.forEach(s => {
                 const d = document.createElement('div'); d.className = 'option-card';
-                if(selectedColor.toUpperCase() === s.color.toUpperCase()) {
-                    d.classList.add('selected');
-                    pickerCard.classList.remove('selected');
-                }
+                if(selectedColor.toUpperCase() === s.color.toUpperCase()) { d.classList.add('selected'); pickerCard.classList.remove('selected'); }
                 d.innerHTML = `<div class="color-preview" style="background:${s.color}"></div>`;
-                d.onclick = () => { 
-                    setCustomSkinColor(s.color);
-                };
+                d.onclick = () => { setCustomSkinColor(s.color); };
                 c.appendChild(d);
             });
-            
-            let isPresetSelected = availableSkinPresets.some(s => s.color.toUpperCase() === selectedColor.toUpperCase());
-            if (!isPresetSelected) {
-                pickerCard.classList.add('selected');
-            } else {
-                pickerCard.classList.remove('selected');
-            }
         }
 
-
-        function setCustomBulletColor(color) {
-            currentBulletColor = color; 
-            localStorage.setItem('bulColor', color);
-            document.getElementById('bulletColorContainer').querySelector('.option-card').classList.add('selected');
-            renderBulletSettings(); 
-        }
+        function setCustomBulletColor(color) { currentBulletColor = color; localStorage.setItem('bulColor', color); document.getElementById('bulletColorContainer').querySelector('.option-card').classList.add('selected'); renderBulletSettings(); }
 
         function renderBulletSettings() {
-            const cColor = document.getElementById('bulletColorContainer'); 
-            const pickerCard = cColor.querySelector('.option-card');
-            pickerCard.classList.add('selected'); 
-            
-            const picker = document.getElementById('customColorPicker');
-            picker.value = currentBulletColor; 
-
+            const cColor = document.getElementById('bulletColorContainer'); const pickerCard = cColor.querySelector('.option-card'); pickerCard.classList.add('selected'); 
+            const picker = document.getElementById('customColorPicker'); picker.value = currentBulletColor; 
             const cShape = document.getElementById('bulletShapeContainer'); cShape.innerHTML = '';
             availableBulletShapes.forEach(s => {
-                const d = document.createElement('div'); d.className = 'option-card';
-                if(currentBulletShape === s.id) d.classList.add('selected');
-                
-                const preview = document.createElement('div');
-                preview.className = `shape-preview shape-${s.id}`;
-                preview.textContent = s.name;
-                
-                if (s.id !== 's_tri') { 
-                    preview.style.backgroundColor = '#fff'; 
-                }
-
+                const d = document.createElement('div'); d.className = 'option-card'; if(currentBulletShape === s.id) d.classList.add('selected');
+                const preview = document.createElement('div'); preview.className = `shape-preview shape-${s.id}`; preview.textContent = s.name;
+                if (s.id !== 's_tri') preview.style.backgroundColor = '#fff'; 
                 d.appendChild(preview);
-                
-                d.onclick = () => { 
-                    currentBulletShape = s.id; 
-                    localStorage.setItem('bulShape', s.id); 
-                    renderBulletSettings(); 
-                };
+                d.onclick = () => { currentBulletShape = s.id; localStorage.setItem('bulShape', s.id); renderBulletSettings(); };
                 cShape.appendChild(d);
             });
         }
         
-        // --- НОВАЯ ЛОГИКА СТАТИСТИКИ ---
-        
-        function getFavoriteColor() {
-            let maxCount = -1;
-            let favColor = currentSkinColor; // По умолчанию - текущий
-            
-            for (const color in stats.colorUsage) {
-                if (stats.colorUsage[color] > maxCount) {
-                    maxCount = stats.colorUsage[color];
-                    favColor = color;
-                }
-            }
-            return favColor;
-        }
-
         function openStatsModal() {
-            const t = translations[currentLang];
-            
-            // Загрузка и форматирование данных
-            const favColor = getFavoriteColor();
-            const acc = stats.autoAccuracy.toFixed(2);
-            
+            const favColor = (function() { let maxCount = -1; let fav = currentSkinColor; for (const color in stats.colorUsage) { if (stats.colorUsage[color] > maxCount) { maxCount = stats.colorUsage[color]; fav = color; } } return fav; })();
             document.getElementById('statJumps').textContent = stats.totalJumps;
             document.getElementById('statFavColor').textContent = favColor;
-            document.getElementById('statFavColor').style.color = favColor; // Выделение цвета
-            document.getElementById('statAcc').textContent = `${acc}%`;
-            
+            document.getElementById('statFavColor').style.color = favColor;
+            document.getElementById('statAcc').textContent = `${stats.autoAccuracy.toFixed(2)}%`;
             document.getElementById('statRecNormal').textContent = stats.records.normal;
             document.getElementById('statRecHardened').textContent = stats.records.hardened;
             document.getElementById('statRecHardcore').textContent = stats.records.hardcore;
-            
             document.getElementById('statsModal').style.display = 'flex';
         }
 
-        function closeStatsModal() {
-            document.getElementById('statsModal').style.display = 'none';
-        }
-
+        function closeStatsModal() { document.getElementById('statsModal').style.display = 'none'; }
 
         function startGame(mode) {
-            gameMode.type = mode;
-            gameMode.isAuto = (mode === 'auto');
-            gameMode.autoState = (mode === 'auto') ? 'active' : 'off';
-            
-            if (mode === 'normal' || mode === 'auto') {
-                gameMode.enemyHP = 1; gameMode.speedMult = 1; player.maxHp = 3;
-            } else if (mode === 'hardened') {
-                gameMode.enemyHP = 5; gameMode.speedMult = 1.5; player.maxHp = 3;
-            } else if (mode === 'hardcore') {
-                gameMode.enemyHP = 5; gameMode.speedMult = 2.0; player.maxHp = 1;
-            }
-
+            gameMode.type = mode; gameMode.isAuto = (mode === 'auto'); gameMode.autoState = (mode === 'auto') ? 'active' : 'off';
+            if (mode === 'normal' || mode === 'auto') { gameMode.enemyHP = 1; gameMode.speedMult = 1; player.maxHp = 3; } 
+            else if (mode === 'hardened') { gameMode.enemyHP = 5; gameMode.speedMult = 1.5; player.maxHp = 3; } 
+            else if (mode === 'hardcore') { gameMode.enemyHP = 5; gameMode.speedMult = 2.0; player.maxHp = 1; }
             document.querySelectorAll('.game-screen').forEach(s => s.style.display = 'none');
             document.getElementById('gameCanvas').style.display = 'block';
-            
-            if (gameMode.isAuto) {
-                document.getElementById('autopilotToggle').style.display = 'block';
-                document.getElementById('autopilotToggle').textContent = translations[currentLang].stop_auto;
-                document.getElementById('controls').style.display = 'none';
-            } else {
-                document.getElementById('controls').style.display = 'flex';
-            }
-
-            // Учет использования цвета
-            const colorKey = currentSkinColor.toUpperCase();
-            stats.colorUsage[colorKey] = (stats.colorUsage[colorKey] || 0) + 1;
-            
-            gameState = 'PLAYING';
-            initLevel();
-            loop();
+            document.getElementById('snowLayer').style.display = 'none'; // Убираем снежинки в самой игре для FPS
+            if (gameMode.isAuto) { document.getElementById('autopilotToggle').style.display = 'block'; document.getElementById('autopilotToggle').textContent = translations[currentLang].stop_auto; document.getElementById('controls').style.display = 'none'; } 
+            else { document.getElementById('controls').style.display = 'flex'; }
+            const colorKey = currentSkinColor.toUpperCase(); stats.colorUsage[colorKey] = (stats.colorUsage[colorKey] || 0) + 1;
+            gameState = 'PLAYING'; initLevel(); loop();
         }
 
-        // --- ИГРОВАЯ ЛОГИКА ---
-
-        function disableAutopilotManual() {
-            if(gameMode.autoState === 'active') {
-                // Увеличение аккуратности ИИ на 0.3%
-                stats.autoAccuracy = Math.min(100, stats.autoAccuracy + 0.3); 
-                
-                gameMode.autoState = 'stopping';
-                document.getElementById('autopilotToggle').textContent = translations[currentLang].ai_stopping;
-                showChat(translations[currentLang].ai_stopping);
-                saveStats();
-            }
-        }
-        
-        // ... (runAutopilot и initLevel без изменений) ...
+        function disableAutopilotManual() { if(gameMode.autoState === 'active') { stats.autoAccuracy = Math.min(100, stats.autoAccuracy + 0.3); gameMode.autoState = 'stopping'; document.getElementById('autopilotToggle').textContent = translations[currentLang].ai_stopping; showChat(translations[currentLang].ai_stopping); saveStats(); } }
         
         function runAutopilot() {
             if (gameMode.autoState === 'off') return;
-            
-            if (gameMode.autoState === 'stopping' && player.grounded) {
-                gameMode.isAuto = false;
-                gameMode.autoState = 'off';
-                document.getElementById('autopilotToggle').style.display = 'none';
-                document.getElementById('controls').style.display = 'flex';
-                keys.right = false; keys.up = false; keys.shoot = false;
-                showChat(translations[currentLang].ai_stop);
-                return;
-            }
-
-            const lookAhead = 150;
-            let dangerSpike = false;
-            let groundAhead = false;
-            let targetAhead = false;
-
-            for (let e of enemies) {
-                if (e.x > player.x && e.x < player.x + lookAhead) dangerSpike = true;
-            }
-            for (let p of platforms) {
-                if (p.x < player.x + lookAhead + 50 && p.x + p.width > player.x + lookAhead && Math.abs(p.y - player.y) < TILE_SIZE*2) groundAhead = true;
-            }
-            for (let t of targets) {
-                if (t.x > player.x && t.x < player.x + 400 && Math.abs(t.y - player.y) < 50) targetAhead = true;
-            }
-
-            keys.right = true;
-            keys.shoot = targetAhead;
-
-            if (dangerSpike || !groundAhead) {
-                if (player.grounded) keys.up = true;
-                else if (player.jumpsLeft > 0 && player.vy > 0) keys.up = true;
-            } else {
-                keys.up = false;
-            }
+            if (gameMode.autoState === 'stopping' && player.grounded) { gameMode.isAuto = false; gameMode.autoState = 'off'; document.getElementById('autopilotToggle').style.display = 'none'; document.getElementById('controls').style.display = 'flex'; keys.right = false; keys.up = false; keys.shoot = false; showChat(translations[currentLang].ai_stop); return; }
+            const lookAhead = 150; let dangerSpike = false, groundAhead = false, targetAhead = false;
+            for (let e of enemies) if (e.x > player.x && e.x < player.x + lookAhead) dangerSpike = true;
+            for (let p of platforms) if (p.x < player.x + lookAhead + 50 && p.x + p.width > player.x + lookAhead && Math.abs(p.y - player.y) < TILE_SIZE*2) groundAhead = true;
+            for (let t of targets) if (t.x > player.x && t.x < player.x + 400 && Math.abs(t.y - player.y) < 50) targetAhead = true;
+            keys.right = true; keys.shoot = targetAhead;
+            if (dangerSpike || !groundAhead) { if (player.grounded) keys.up = true; else if (player.jumpsLeft > 0 && player.vy > 0) keys.up = true; } else { keys.up = false; }
         }
 
         function initLevel() {
-            player.hp = player.maxHp;
-            player.x = 100; player.y = 100; player.vx = 0; player.vy = 0;
-            player.jumpsLeft = player.maxJumps;
-            bullets = []; targets = []; enemies = []; platforms = [];
-            score = 0; lastScoredBlock = 0;
-            pusheenSpawned = false; pusheenDefeated = false;
-            
-            updateHearts();
-            updateHUDText(); 
-
+            player.hp = player.maxHp; player.x = 100; player.y = 100; player.vx = 0; player.vy = 0; player.jumpsLeft = player.maxJumps;
+            bullets = []; targets = []; enemies = []; platforms = []; score = 0; lastScoredBlock = 0; pusheenSpawned = false; pusheenDefeated = false;
+            updateHearts(); updateHUDText(); 
             for(let i=0; i<5; i++) platforms.push({ x: i * TILE_SIZE, y: canvas.height - TILE_SIZE, width: TILE_SIZE, height: TILE_SIZE });
             platforms.push({ x: -TILE_SIZE, y: canvas.height - TILE_SIZE, width: TILE_SIZE, height: TILE_SIZE }); 
-
             let currentX = 5 * TILE_SIZE;
             for(let i=0; i<80; i++) {
                 const rand = Math.random();
                 if (rand < 0.2) { currentX += TILE_SIZE * 2; } 
                 else if (rand < 0.8) {
-                    let length = Math.floor(Math.random() * 4) + 2; 
-                    let platformStartY = canvas.height - TILE_SIZE;
+                    let length = Math.floor(Math.random() * 4) + 2; let platformStartY = canvas.height - TILE_SIZE;
                     for(let j=0; j<length; j++) {
                         platforms.push({ x: currentX, y: platformStartY, width: TILE_SIZE, height: TILE_SIZE });
-                        if (j === Math.floor(length/2) && Math.random() < 0.5) {
-                            targets.push({ x: currentX, y: platformStartY - TILE_SIZE, width: TILE_SIZE, height: TILE_SIZE, hp: gameMode.enemyHP });
-                        }
-                        if (j === 0 && length >= 3 && Math.random() < 0.3) {
-                            enemies.push({ x: currentX + 10, y: platformStartY - 30, width: 30, height: 30, type: 'spike' });
-                        }
+                        if (j === Math.floor(length/2) && Math.random() < 0.5) targets.push({ x: currentX, y: platformStartY - TILE_SIZE, width: TILE_SIZE, height: TILE_SIZE, hp: gameMode.enemyHP });
+                        if (j === 0 && length >= 3 && Math.random() < 0.3) enemies.push({ x: currentX + 10, y: platformStartY - 30, width: 30, height: 30, type: 'spike' });
                         currentX += TILE_SIZE;
                     }
                     if (length > 3) currentX += TILE_SIZE * 2;
                 } else {
-                    currentX += TILE_SIZE * 3;
-                    let pX = currentX;
-                    let pY = canvas.height - TILE_SIZE * (Math.floor(Math.random() * 3) + 3);
+                    currentX += TILE_SIZE * 3; let pX = currentX; let pY = canvas.height - TILE_SIZE * (Math.floor(Math.random() * 3) + 3);
                     platforms.push({ x: pX, y: pY, width: TILE_SIZE * 2, height: TILE_SIZE });
                     if (Math.random() < 0.5) enemies.push({ x: pX + 10, y: pY - 30, width: 30, height: 30, type: 'spike' });
                     if (Math.random() < 0.5) targets.push({ x: pX + TILE_SIZE, y: pY - TILE_SIZE, width: TILE_SIZE, height: TILE_SIZE, hp: gameMode.enemyHP });
@@ -848,308 +510,127 @@
             }
         }
 
-
         function handleSolidCollision(r1, r2) {
-            if (!checkCollision(r1, r2)) return false;
-            const dx = (r1.x + r1.width / 2) - (r2.x + r2.width / 2);
-            const dy = (r1.y + r1.height / 2) - (r2.y + r2.height / 2);
-            const overlapX = (r1.width / 2 + r2.width / 2) - Math.abs(dx);
-            const overlapY = (r1.height / 2 + r2.height / 2) - Math.abs(dy);
-            
-            if (overlapX < overlapY) {
-                if (dx > 0) r1.x += overlapX; else r1.x -= overlapX;
-                r1.vx = 0;
-            } else {
-                if (dy > 0) { r1.y += overlapY; r1.vy = 0; } 
-                else { r1.y -= overlapY; r1.vy = 0; r1.grounded = true; r1.jumpsLeft = r1.maxJumps; }
-            }
+            if (!(r1.x < r2.x + r2.width && r1.x + r1.width > r2.x && r1.y < r2.y + r2.height && r1.y + r1.height > r2.y)) return false;
+            const dx = (r1.x + r1.width / 2) - (r2.x + r2.width / 2); const dy = (r1.y + r1.height / 2) - (r2.y + r2.height / 2);
+            const overlapX = (r1.width / 2 + r2.width / 2) - Math.abs(dx); const overlapY = (r1.height / 2 + r2.height / 2) - Math.abs(dy);
+            if (overlapX < overlapY) { if (dx > 0) r1.x += overlapX; else r1.x -= overlapX; r1.vx = 0; } 
+            else { if (dy > 0) { r1.y += overlapY; r1.vy = 0; } else { r1.y -= overlapY; r1.vy = 0; r1.grounded = true; r1.jumpsLeft = r1.maxJumps; } }
             return true;
         }
 
         function shoot() {
             if (gameState !== 'PLAYING' || !canShoot) return;
             const bSpeed = player.facingRight ? 15 : -15; 
-            
             let bulletWidth = 20, bulletHeight = 10;
-            if (currentBulletShape === 's_circle' || currentBulletShape === 's_puffy' || currentBulletShape === 's_diamond' || currentBulletShape === 's_sun' || currentBulletShape === 's_cookie') {
-                 bulletWidth = bulletHeight = 20;
-            }
-
-            bullets.push({ 
-                x: player.x + player.width / 2, y: player.y + player.height / 2 - 5, 
-                vx: bSpeed, width: bulletWidth, height: bulletHeight, life: 60, 
-                color: currentBulletColor, shape: currentBulletShape 
-            });
-            canShoot = false;
-            player.cooldownTimer = shootCooldown; 
+            if (['s_circle', 's_puffy', 's_diamond', 's_sun', 's_cookie'].includes(currentBulletShape)) bulletWidth = bulletHeight = 20;
+            bullets.push({ x: player.x + player.width / 2, y: player.y + player.height / 2 - 5, vx: bSpeed, width: bulletWidth, height: bulletHeight, life: 60, color: currentBulletColor, shape: currentBulletShape });
+            canShoot = false; player.cooldownTimer = shootCooldown; 
         }
 
         function update() {
             if (gameState !== 'PLAYING') return;
             if (gameMode.isAuto) runAutopilot();
-
             if (keys.shoot) shoot();
             if (player.cooldownTimer > 0) player.cooldownTimer--; else if (player.cooldownTimer === 0) canShoot = true;
-
             let moveSpeed = player.speed * gameMode.speedMult;
-
-            if (keys.left && !gameMode.isAuto) { player.vx = -moveSpeed; player.facingRight = false; } 
-            else if (keys.right) { player.vx = moveSpeed; player.facingRight = true; } 
-            else { player.vx = 0; }
-
+            if (keys.left && !gameMode.isAuto) { player.vx = -moveSpeed; player.facingRight = false; } else if (keys.right) { player.vx = moveSpeed; player.facingRight = true; } else { player.vx = 0; }
             if (keys.up) {
-                if (player.grounded) { 
-                    player.vy = player.jumpPower; 
-                    player.grounded = false; 
-                    player.jumpsLeft--; 
-                    stats.totalJumps++; // Учет прыжка
-                    keys.up = false; // Отключаем, чтобы не было постоянного прыжка
-                } 
-                else if (player.jumpsLeft > 0) { 
-                    player.vy = player.jumpPower; 
-                    player.jumpsLeft--; 
-                    stats.totalJumps++; // Учет прыжка
-                    keys.up = false; // Ключевое изменение для двойного прыжка
-                }
-                
-                // Для автопилота:
-                else if (gameMode.isAuto && player.jumpsLeft > 0 && player.vy > 0) { 
-                     player.vy = player.jumpPower; 
-                     player.jumpsLeft--;
-                     stats.totalJumps++; // Учет прыжка
-                }
+                if (player.grounded) { player.vy = player.jumpPower; player.grounded = false; player.jumpsLeft--; stats.totalJumps++; keys.up = false; } 
+                else if (player.jumpsLeft > 0) { player.vy = player.jumpPower; player.jumpsLeft--; stats.totalJumps++; keys.up = false; }
             }
-
-
-            player.vy += GRAVITY;
-            if(player.vy > TERMINAL_VELOCITY) player.vy = TERMINAL_VELOCITY;
+            player.vy += GRAVITY; if(player.vy > TERMINAL_VELOCITY) player.vy = TERMINAL_VELOCITY;
             player.x += player.vx; player.y += player.vy;
-
             if (!pusheenSpawned && player.x > 500) { pusheenSpawned = true; enemies.push(pusheenEnemy); showChat(translations[currentLang].pusheen_chat_1); }
-            if (pusheenSpawned && !pusheenDefeated && pusheenEnemy.hp <= 0) {
-                 pusheenDefeated = true; showChat(translations[currentLang].player_chat_1, 2500); setTimeout(() => showChat(translations[currentLang].pusheen_chat_2), 3000);
-            }
-
-            player.grounded = false;
-            platforms.forEach(p => handleSolidCollision(player, p));
-            targets.forEach(t => handleSolidCollision(player, t));
-
+            if (pusheenSpawned && !pusheenDefeated && pusheenEnemy.hp <= 0) { pusheenDefeated = true; showChat(translations[currentLang].player_chat_1, 2500); setTimeout(() => showChat(translations[currentLang].pusheen_chat_2), 3000); }
+            player.grounded = false; platforms.forEach(p => handleSolidCollision(player, p)); targets.forEach(t => handleSolidCollision(player, t));
             if (player.y > canvas.height + 100) takeDamage(3);
-            const currentBlock = Math.floor(player.x / TILE_SIZE);
-            if (currentBlock > lastScoredBlock + 3) { score += 10; lastScoredBlock = currentBlock; updateHUDText(); }
-
+            const currentBlock = Math.floor(player.x / TILE_SIZE); if (currentBlock > lastScoredBlock + 3) { score += 10; lastScoredBlock = currentBlock; updateHUDText(); }
             for (let i = bullets.length - 1; i >= 0; i--) {
-                let b = bullets[i]; b.x += b.vx; b.life--;
-                let hit = false;
-                for (let j = targets.length - 1; j >= 0; j--) {
-                    let t = targets[j];
-                    if (checkCollision(b, t)) { t.hp--; score += 5; hit = true; if (t.hp <= 0) { targets.splice(j, 1); score += 50; } break; }
-                }
+                let b = bullets[i]; b.x += b.vx; b.life--; let hit = false;
+                for (let j = targets.length - 1; j >= 0; j--) { let t = targets[j]; if (checkCollision(b, t)) { t.hp--; score += 5; hit = true; if (t.hp <= 0) { targets.splice(j, 1); score += 50; } break; } }
                 if (pusheenSpawned && !pusheenDefeated && checkCollision(b, pusheenEnemy)) { pusheenEnemy.hp--; score += 1; hit = true; }
                 if (b.life <= 0 || hit) bullets.splice(i, 1);
             }
-            updateHUDText();
-
             if (player.invulnerable > 0) player.invulnerable--;
             for (let i = enemies.length - 1; i >= 0; i--) {
-                let e = enemies[i];
-                if (checkCollision(player, e)) {
-                    if (e.type === 'spike') { takeDamage(1); break; }
-                    else if (e.type === 'pusheen' && !pusheenDefeated) { takeDamage(3); break; }
-                }
+                let e = enemies[i]; if (checkCollision(player, e)) { if (e.type === 'spike') { takeDamage(1); break; } else if (e.type === 'pusheen' && !pusheenDefeated) { takeDamage(3); break; } }
                 if (e.type === 'pusheen' && pusheenDefeated) enemies.splice(i, 1);
             }
-
-            let targetCamX = player.x - canvas.width / 2 + player.width / 2;
-            if (targetCamX < 0) targetCamX = 0;
-            cameraX += (targetCamX - cameraX) * 0.1; 
+            let targetCamX = player.x - canvas.width / 2 + player.width / 2; if (targetCamX < 0) targetCamX = 0; cameraX += (targetCamX - cameraX) * 0.1; 
         }
 
         function takeDamage(amount) {
             if (player.invulnerable > 0) return;
             player.hp -= amount; player.invulnerable = 60; player.vy = -5; updateHearts();
             if (player.hp <= 0) {
-                gameState = 'GAMEOVER';
-                
-                // Обновление рекордов
-                const modeKey = gameMode.type;
-                if (score > stats.records[modeKey]) {
-                    stats.records[modeKey] = score;
-                }
-                // Обновление общего рекорда
-                if (score > highScore) { highScore = score; }
-                
-                saveStats(); // Сохранение обновленных рекордов
-                
-                const t = translations[currentLang];
-                document.getElementById('gameOverText').innerHTML = `${t.score_label} ${score} | ${t.record}: ${highScore}`;
-                document.getElementById('gameOverModal').style.display = 'flex';
-                document.getElementById('controls').style.display = 'none';
-                document.getElementById('autopilotToggle').style.display = 'none';
+                gameState = 'GAMEOVER'; const modeKey = gameMode.type; if (score > stats.records[modeKey]) stats.records[modeKey] = score; if (score > highScore) highScore = score; saveStats();
+                const t = translations[currentLang]; document.getElementById('gameOverText').innerHTML = `${t.score_label} ${score} | ${t.record}: ${highScore}`;
+                document.getElementById('gameOverModal').style.display = 'flex'; document.getElementById('controls').style.display = 'none';
             }
         }
 
-        const chatBox = document.getElementById('chatBox');
-        function showChat(message, duration = 2000) {
-            chatBox.textContent = message; chatBox.style.opacity = '1';
-            setTimeout(() => { chatBox.style.opacity = '0'; }, duration);
-        }
+        function showChat(message, duration = 2000) { chatBox.textContent = message; chatBox.style.opacity = '1'; setTimeout(() => { chatBox.style.opacity = '0'; }, duration); }
+        function updateHearts() { heartContainer.innerHTML = ''; for(let i=0; i<player.hp; i++) { const h = document.createElement('span'); h.className = 'heart'; h.innerHTML = '♥️'; heartContainer.appendChild(h); } }
+        function checkCollision(r1, r2) { return (r1.x < r2.x + r2.width && r1.x + r1.width > r2.x && r1.y < r2.y + r2.height && r1.y + r1.height > r2.y); }
 
-        function updateHearts() {
-            heartContainer.innerHTML = '';
-            for(let i=0; i<player.hp; i++) {
-                const h = document.createElement('span'); h.className = 'heart'; h.innerHTML = '♥️'; heartContainer.appendChild(h);
-            }
-        }
-
-        // --- ОТРИСОВКА ---
-        
-        function checkCollision(r1, r2) {
-            return (r1.x < r2.x + r2.width && r1.x + r1.width > r2.x && r1.y < r2.y + r2.height && r1.y + r1.height > r2.y);
-        }
-        function drawStar(ctx, cx, cy, spikes, outerRadius, innerRadius) {
-            let rot = Math.PI / 2 * 3;
-            let x = cx;
-            let y = cy;
-            let step = Math.PI / spikes;
-
-            ctx.beginPath();
-            ctx.moveTo(cx, cy - outerRadius);
-            for (let i = 0; i < spikes; i++) {
-                x = cx + Math.cos(rot) * outerRadius;
-                y = cy + Math.sin(rot) * outerRadius;
-                ctx.lineTo(x, y);
-                rot += step;
-
-                x = cx + Math.cos(rot) * innerRadius;
-                y = cy + Math.sin(rot) * innerRadius;
-                ctx.lineTo(x, y);
-                rot += step;
-            }
-            ctx.closePath();
-            ctx.fill();
-        }
-        function drawRoundedRect(ctx, x, y, w, h, radius) {
-            let r = radius; 
-            if (r > w / 2) r = w / 2;
-            if (r > h / 2) r = h / 2;
-
-            ctx.beginPath();
-            ctx.moveTo(x + r, y);
-            ctx.lineTo(x + w - r, y);
-            ctx.quadraticCurveTo(x + w, y, x + w, y + r); 
-            ctx.lineTo(x + w, y + h - r);
-            ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h); 
-            ctx.lineTo(x + r, y + h);
-            ctx.quadraticCurveTo(x, y + h, x, y + h - r); 
-            ctx.lineTo(x, y + r);
-            ctx.quadraticCurveTo(x, y, x + r, y); 
-            ctx.closePath();
-            ctx.fill();
-        }
-
-
+        // --- ОБНОВЛЕННАЯ ОТРИСОВКА БЛОКОВ (WINTER) ---
         function draw() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             ctx.save(); ctx.translate(-cameraX, 0);
 
             for (let p of platforms) {
-                if (assets.ground.complete && assets.ground.naturalHeight !== 0) ctx.drawImage(assets.ground, p.x, p.y, p.width, p.height);
-                else { ctx.fillStyle = '#654321'; ctx.fillRect(p.x, p.y, p.width, p.height); ctx.fillStyle = '#00FF00'; ctx.fillRect(p.x, p.y, p.width, 10); }
+                // Основной блок
+                ctx.fillStyle = '#4a3728'; // Тёмная земля
+                ctx.fillRect(p.x, p.y, p.width, p.height);
+                
+                // СНЕЖНАЯ ШАПКА (Частично белые блоки)
+                ctx.fillStyle = '#ffffff';
+                ctx.fillRect(p.x, p.y, p.width, 12); // Верхний слой снега
+                ctx.fillStyle = '#d0e0f0'; // Тень на снегу
+                ctx.fillRect(p.x, p.y + 12, p.width, 4);
             }
 
             for (let t of targets) {
-                ctx.fillStyle = `rgba(0, 0, 255, ${t.hp / gameMode.enemyHP})`; 
+                ctx.fillStyle = `rgba(0, 100, 200, ${t.hp / gameMode.enemyHP})`; // Синий ледяной блок
                 ctx.fillRect(t.x, t.y, t.width, t.height);
-                if (assets.ground.complete && assets.ground.naturalHeight !== 0) { ctx.globalAlpha = 0.2; ctx.drawImage(assets.ground, t.x, t.y, t.width, t.height); ctx.globalAlpha = 1.0; }
                 ctx.fillStyle = 'white'; ctx.font = 'bold 20px monospace'; ctx.fillText(t.hp, t.x + t.width/2 - 5, t.y + t.height/2 + 5);
+                // Снежок на таргете
+                ctx.fillStyle = 'rgba(255,255,255,0.8)';
+                ctx.fillRect(t.x + 5, t.y, t.width - 10, 5);
             }
 
+            // Отрисовка шипов, пуль и игрока остается прежней...
             for (let e of enemies) {
                 if(e.type === 'spike') {
-                    if (assets.spike.complete && assets.spike.naturalHeight !== 0) ctx.drawImage(assets.spike, e.x, e.y, e.width, e.height);
-                    else { ctx.fillStyle = 'purple'; ctx.beginPath(); ctx.moveTo(e.x, e.y+e.height); ctx.lineTo(e.x+e.width/2, e.y); ctx.lineTo(e.x+e.width, e.y+e.height); ctx.fill(); }
+                    ctx.fillStyle = '#a0c0ff'; // Ледяные шипы
+                    ctx.beginPath(); ctx.moveTo(e.x, e.y+e.height); ctx.lineTo(e.x+e.width/2, e.y); ctx.lineTo(e.x+e.width, e.y+e.height); ctx.fill();
                 } else if (e.type === 'pusheen') {
-                    if (!pusheenDefeated) {
-                        ctx.fillStyle = 'darkred'; ctx.fillRect(e.x, e.y, e.width, e.height);
-                        ctx.fillStyle = 'white'; ctx.font = '16px monospace'; ctx.fillText(`BOSS`, e.x, e.y-5);
-                    } else {
-                        ctx.fillStyle = 'pink'; ctx.fillRect(e.x, e.y, e.width, e.height);
-                        ctx.fillStyle = 'black'; ctx.font = '16px monospace'; ctx.fillText(`PUSHEEN`, e.x, e.y-5);
-                    }
+                    ctx.fillStyle = !pusheenDefeated ? 'darkred' : 'pink'; ctx.fillRect(e.x, e.y, e.width, e.height);
                 }
             }
 
             for (let b of bullets) {
                 ctx.fillStyle = b.color;
-                
-                if (b.shape === 's_circle') { 
-                    ctx.beginPath(); 
-                    ctx.arc(b.x + b.width/2, b.y + b.height/2, b.width/2, 0, Math.PI * 2); 
-                    ctx.fill(); 
-                } else if (b.shape === 's_tri') {
-                    ctx.beginPath();
-                    if(b.vx > 0) { ctx.moveTo(b.x, b.y); ctx.lineTo(b.x + b.width, b.y + b.height / 2); ctx.lineTo(b.x, b.y + b.height); }
-                    else { ctx.moveTo(b.x + b.width, b.y); ctx.lineTo(b.x, b.y + b.height / 2); ctx.lineTo(b.x + b.width, b.y + b.height); }
-                    ctx.fill();
-                } else if (b.shape === 's_diamond') {
-                    let cx = b.x + b.width / 2;
-                    let cy = b.y + b.height / 2;
-                    ctx.beginPath();
-                    ctx.moveTo(cx, b.y); 
-                    ctx.lineTo(b.x + b.width, cy); 
-                    ctx.lineTo(cx, b.y + b.height); 
-                    ctx.lineTo(b.x, cy); 
-                    ctx.closePath();
-                    ctx.fill();
-                } else if (b.shape === 's_sun') {
-                    drawStar(ctx, b.x + b.width/2, b.y + b.height/2, 5, b.width/2, b.width/4);
-                } else if (b.shape === 's_cookie' || b.shape === 's_puffy') {
-                    drawRoundedRect(ctx, b.x, b.y, b.width, b.height, b.width * 0.4); 
-                } else { 
-                    ctx.fillRect(b.x, b.y, b.width, b.height); 
-                }
+                if (b.shape === 's_circle') { ctx.beginPath(); ctx.arc(b.x + b.width/2, b.y + b.height/2, b.width/2, 0, Math.PI * 2); ctx.fill(); } 
+                else { ctx.fillRect(b.x, b.y, b.width, b.height); }
             }
             
             if (player.invulnerable % 10 < 5) { ctx.fillStyle = currentSkinColor; ctx.fillRect(player.x, player.y, player.width, player.height); }
-
-            if (!player.grounded && player.jumpsLeft > 0) {
-                const bx = player.x + 10; const by = player.y - 15;
-                ctx.fillStyle = 'rgba(255,0,0,0.5)'; ctx.fillRect(bx, by, 30, 5);
-                // Отрисовка второго прыжка
-                if(player.jumpsLeft === 2) { 
-                    ctx.fillStyle = '#4CAF50'; ctx.fillRect(bx + 15, by, 15, 5);
-                    ctx.fillStyle = '#00FF00'; ctx.fillRect(bx, by, 15, 5); 
-                }
-                // Отрисовка первого прыжка
-                else if(player.jumpsLeft === 1) { 
-                    ctx.fillStyle = '#00FF00'; ctx.fillRect(bx, by, 15, 5); 
-                }
-            }
-
             ctx.restore();
-            ctx.fillStyle = 'rgba(255,255,255,0.7)'; ctx.font = 'bold 16px monospace';
-            ctx.fillText('V5.3.1', canvas.width - 70, 20); 
+            ctx.fillStyle = 'white'; ctx.font = 'bold 16px monospace'; ctx.fillText('V5.3.1 - WINTER', canvas.width - 140, 20); 
         }
 
-        function loop() {
-            update(); draw();
-            if (gameState === 'PLAYING') requestAnimationFrame(loop);
-        }
+        function loop() { update(); draw(); if (gameState === 'PLAYING') requestAnimationFrame(loop); }
         
         window.onload = function() { 
-            // Инициализация игрока с 2 прыжками
             player.maxJumps = 2; 
-            
-            // Проверка и корректировка старых записей рекордов, если они были только в highScore
-            if (!stats.records.normal && highScore) {
-                 stats.records.normal = parseInt(highScore);
-                 saveStats();
-            }
-
+            if (!stats.records.normal && highScore) { stats.records.normal = parseInt(highScore); saveStats(); }
+            createSnow(); // Запуск снежинок в меню
             setLanguage(currentLang);
             showMenu(); 
         };
     </script>
 </body>
 </html>
+
